@@ -131,3 +131,35 @@ function foo() {
 var x20 = 2;
 var f = foo();
 f();
+
+// 4 函数参数传递方式-原始类型的值(数值、字符串、布尔值)为传值传递，若为复合类型(数组、对象、其他函数)，则为引用传递
+var p20 = 2;
+function f30(p) {
+  p20 = 3;
+}
+
+f(p20);
+console.log(p20); // 2
+
+var obj = { p: 1 };
+function f31(o) {
+  o.p = 2;
+}
+f31(obj);
+console.log(obj.p); // 2
+// 若在函数内部修改的是整个参数，这时不会影响原始值。
+
+function f31(o) {
+  o = [2, 3, 4];
+}
+f31(obj);
+console.log(obj);
+
+// 4.4 同名参数，取最后出现的那个值
+function f40(a, a) {
+  console.log(a);
+  console.log(arguments[0]);
+}
+
+f40(1, 2); // 2, 1
+f40(1); // undefined, 1
