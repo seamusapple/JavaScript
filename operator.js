@@ -251,3 +251,78 @@ saveText("this"); // this
 // 则返回第二个表达式的值，否则返回第三个表达式的值。
 console.log("t" ? "hello" : "world"); // "hello"
 console.log(0 ? "hello" : "world"); // "world"
+
+// 将任意数值转为32位整数。
+function toInt32(x) {
+  return x | 0;
+}
+toInt32(1.001); // 1
+toInt32(1.999); // 1
+toInt32(1); // 1
+toInt32(-1); // -1
+toInt32(Math.pow(2, 32) + 1); // 1
+toInt32(Math.pow(2, 32) - 1); // -1
+
+// 位运算只对整数有效，遇到小数时，会将小数部分舍去，只保留整数部分。
+// 所以，将一个小数与0进行二进制或运算，等同于对该数去除小数部分，即取整数位。
+console.log(2.9 | 0); // 2
+console.log(-2.9 | 0); // -2
+
+// 一个数与自身的取反值相加，等于-1。
+console.log(~-3); // 2
+
+// 对一个整数连续两次二进制否运算，得到它自身.
+console.log(~~3);
+
+// 二进制否运算遇到小数时，也会将小数部分舍去，只保留整数部分。
+// 所以，对一个小数连续进行两次二进制否运算，能达到取整效果。
+console.log(~~2.9);
+
+// 对字符串进行二进制否运算，JavaScript 引擎会先调用Number函数，将字符串转为数值。
+console.log(~"011"); // -12
+console.log(~Number("42 cats"));
+console.log(~NaN); // -1
+console.log(~"42 cars"); // -1
+
+// 连续对两个数a和b进行三次异或运算，a^=b; b^=a; a^=b;，可以互换它们的值。
+// 这意味着，使用“异或运算”可以在不引入临时变量的前提下，互换两个变量的值
+var a = 10;
+var b = 99;
+(a ^= b), (b ^= a), (a ^= b);
+console.log(a);
+console.log(b);
+
+// 如果左移0位，就相当于将该数值转为32位整数，等同于取整，对于正数和负数都有效。
+console.log(13.5 << 0); // 13
+console.log(-13.5 << 0);
+console.log((186 << 16).toString(16));
+
+var color = { r: 186, g: 218, b: 85 };
+var rgb2hex = function (r, g, b) {
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).substr(1);
+};
+
+console.log(rgb2hex(color.r, color.g, color.b));
+
+// 开关作用
+var FLAG_A = 1; // 0001
+var FLAG_B = 2; // 0010
+var FLAG_C = 4; // 0100
+var FLAG_D = 8; // 1000
+
+var flags = 5; // 二进制的0101
+if (flags & FLAG_C) {
+}
+// 上面代码检验是否打开了开关C。如果打开，会返回true，否则返回false。
+
+// 现在假设需要打开A、B、D三个开关，我们可以构造一个掩码变量。
+var mask = FLAG_A | FLAG_B | FLAG_D;
+// 0001 | 0010 | 1000 => 1011
+flags = flags | mask;
+// 上面代码中，计算后得到的flags变量，代表三个开关的二进制位都打开了。
+// 二进制与运算可以将当前设置中凡是与开关设置不一样的项，全部关闭。
+flags = flags & mask;
+// 异或运算可以切换（toggle）当前设置，即第一次执行可以得到当前设置的相反值，再执行一次又得到原来的值。
+flags = flags ^ mask;
+// 二进制否运算可以翻转当前设置，即原设置为0，运算后变为1；原设置为1，运算后变为0。
+flags = ~flags;
