@@ -326,3 +326,24 @@ flags = flags & mask;
 flags = flags ^ mask;
 // 二进制否运算可以翻转当前设置，即原设置为0，运算后变为1；原设置为1，运算后变为0。
 flags = ~flags;
+
+// void运算符的作用是执行一个表达式，然后不返回任何值，或者说返回undefined。
+console.log(void 0);
+console.log(void 0);
+
+// 这个运算符的主要用途是浏览器的书签工具（Bookmarklet），以及在超级链接中插入代码防止网页跳转。
+{
+  /* <a href="javascript: void(document.form.submit())">提交</a>; */
+}
+
+// 逗号运算符用于对两个表达式求值，并返回后一个表达式的值。
+"a", "b"; // b
+
+var x = 0;
+var y = (x++, 10);
+console.log(x);
+console.log(y);
+
+// 逗号运算符的一个用途是，在返回一个值之前，进行一些辅助操作。
+var value = (console.log("hi!"), true);
+console.log(value); // true
