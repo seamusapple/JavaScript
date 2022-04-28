@@ -22,3 +22,46 @@ console.log(Object.getOwnPropertyNames([])); // [ 'length' ]
 console.log(Object.keys(Object.prototype));
 console.log(Object.getOwnPropertyNames(Object.prototype));
 // 这跟Object.keys的行为不同，Object.keys只返回对象自身的可遍历属性的全部属性名
+
+// Object.defineProperty()方法允许通过属性描述对象，定义或修改一个属性，然后返回修改后的对象
+/*
+Object.defineProperty方法接受三个参数，依次如下。
+
+object：属性所在的对象
+propertyName：字符串，表示属性名
+attributesObject：属性描述对象
+*/
+var obj = Object.defineProperty({}, "p", {
+  value: 123,
+  writable: false,
+  enumerable: true,
+  configurable: false,
+});
+console.log(obj.p); // 123
+obj.p = 246;
+console.log(obj.p); // 123
+
+var obj = Object.defineProperties(
+  {},
+  {
+    p1: { value: 123, enumerable: true },
+    p2: { value: "abc", enumerable: true },
+    p3: {
+      get: function () {
+        return this.p1 + this.p2;
+      },
+      enumerable: true,
+      configurable: true,
+    },
+  }
+);
+console.log(obj.p1); // 123
+console.log(obj.p2); // abc
+console.log(obj.p3); // 123abc
+
+// 实例对象的propertyIsEnumerable()方法返回一个布尔值，用来判断某个属性是否可遍历。
+// 注意，这个方法只能用于判断对象自身的属性，对于继承的属性一律返回false
+var obj = {};
+obj.p = 123;
+console.log(obj.propertyIsEnumerable("p")); // true
+console.log(obj.propertyIsEnumerable("toString")); // false
