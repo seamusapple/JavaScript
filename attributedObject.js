@@ -180,3 +180,72 @@ delete obj.p1; // true
 delete obj.p2; // false
 console.log(obj.p1); // undefined
 console.log(obj.p2); // 2
+
+// Getter/Setter
+var obj = Object.defineProperty({}, "p", {
+  get: function () {
+    return "getter";
+  },
+  set: function (value) {
+    console.log("setter: " + value);
+  },
+});
+console.log(obj.p); // getter
+obj.p = 123; // setter: 123
+
+// 写法e二
+var obj = {
+  get p() {
+    return "getter2";
+  },
+  set p(value) {
+    console.log("setter2: " + value);
+  },
+};
+console.log(obj.p); // getter
+obj.p = 123; // setter: 123
+
+// 上面两种写法，虽然属性p的读取和赋值行为是一样的，但是有一些细微的区别。
+// 第一种写法，属性p的configurable和enumerable都为false，从而导致属性p是不可遍历的；
+// 第二种写法，属性p的configurable和enumerable都为true，因此属性p是可遍历的。
+// 实际开发中，写法二更常用。
+
+var obj = {
+  $n: 5,
+  get next() {
+    return this.$n++;
+  },
+  set next(n) {
+    if (n > this.$n) this.$n = n;
+    else throw new Error("新的值必须大于当前值");
+  },
+};
+console.log(obj.next); // 5
+obj.next = 10;
+console.log(obj.next); // 10
+// obj.next = 5;
+// Uncaught Error: 新的值必须大于当前值
+
+// 对象的copy
+var extend = function (to, from) {
+  for (var property in from) {
+    to[property] = from[property];
+  }
+  return to;
+};
+extend({}, { a: 1 });
+// 上面这个方法的问题在于，如果遇到存取器定义的属性，会只拷贝值。
+
+var extend = function (to, from) {
+  for (const property in from) {
+    if (!Object.hasOwnProperty(property)) continue;
+    Object.defineProperty(
+      to,
+      property,
+      Object.getOwnPropertyDescriptors(from, property)
+    );
+  }
+  return to;
+};
+// hasOwnProperty那一行用来过滤掉继承的属性，否则可能会报错，
+// 因为Object.getOwnPropertyDescriptor读不到继承属性的属性描述对象。
