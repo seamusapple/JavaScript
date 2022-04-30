@@ -249,3 +249,53 @@ var extend = function (to, from) {
 };
 // hasOwnProperty那一行用来过滤掉继承的属性，否则可能会报错，
 // 因为Object.getOwnPropertyDescriptor读不到继承属性的属性描述对象。
+
+// 控制对象状态
+// Object.preventExtensions方法可以使得一个对象无法再添加新的属性
+var obj = new Object();
+Object.preventExtensions(obj);
+// Object.defineProperty(obj, "p", {
+//   value: "hello",
+// });
+// TypeError: Cannot define property p, object is not extensible
+console.log(obj.p);
+
+// Object.isExtensible方法用于检查一个对象是否使用了Object.preventExtensions方法。
+// 也就是说，检查是否可以为一个对象添加属性。
+var obj = new Object();
+console.log(Object.isExtensible(obj)); // true
+Object.preventExtensions(obj);
+console.log(Object.isExtensible(obj)); // false
+
+// Object.seal方法使得一个对象既无法添加新属性，也无法删除旧属性
+var obj = { p: "hello" };
+Object.seal(obj);
+delete obj.p;
+console.log(obj.p); // hello
+obj.x = "world";
+console.log(obj.x); // undefined
+
+// Object.seal实质是把属性描述对象的configurable属性设为false，
+// 因此属性描述对象不再能改变了。
+var obj = { p: "a" };
+console.log(Object.getOwnPropertyDescriptor(obj, "p"));
+// { value: 'a', writable: true, enumerable: true, configurable: true }
+Object.seal(obj);
+console.log(Object.getOwnPropertyDescriptor(obj, "p"));
+// { value: 'a', writable: true, enumerable: true, configurable: false }
+// Object.seal只是禁止新增或删除属性，并不影响修改某个属性的值
+console.log(Object.isSealed(obj)); // true
+
+// Object.freeze方法可以使得一个对象无法添加新属性、无法删除旧属性、
+// 也无法改变属性的值，使得这个对象实际上变成了常量。
+var obj = { p: "hello" };
+Object.freeze(obj);
+obj.p = "hello";
+console.log(obj.p); // hello
+obj.t = "hello";
+console.log(obj.t); // undefined
+delete obj.p; // false
+console.log(obj.p); // hello
+console.log(Object.isFrozen(obj)); // true
+console.log(Object.isSealed(obj)); // true
+console.log(Object.isExtensible(obj)); // false
