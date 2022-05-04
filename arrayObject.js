@@ -206,3 +206,194 @@ console.log([1, undefined, 2].map(f)); // ['a', 'a', 'a'];
 console.log([1, null, 2].map(f)); // ['a', 'a', 'a'];
 console.log([1, , 2].map(f)); // ["a", "a"];
 // 上面代码中，map()方法不会跳过undefined和null，但是会跳过空位
+
+// forEach()方法与map()方法很相似，也是对数组的所有成员依次执行参数函数
+// 但是，forEach()方法不返回值，只用来操作数据。
+// 这就是说，如果数组遍历的目的是为了得到返回值，那么使用map()方法，否则使用forEach()方法。
+
+// forEach()的用法与map()方法一致，参数是一个函数，
+// 该函数同样接受三个参数：当前值、当前位置、整个数组。
+function log(element, index, array) {
+  console.log("[" + index + "] = " + element);
+}
+[2, 5, 9].forEach(log);
+
+// forEach()方法也可以接受第二个参数，绑定参数函数的this变量
+var out = [];
+[1, 2, 3].forEach(function (elem) {
+  this.push(elem * elem);
+}, out);
+console.log(out);
+// 上面代码中，空数组out是forEach()方法的第二个参数，结果，回调函数内部的this关键字就指向out。
+
+// 注意，forEach()方法无法中断执行，总是会将所有成员遍历完。
+// 如果希望符合某种条件时，就中断遍历，要使用for循环
+var arr = [1, 2, 3];
+for (var i = 0; i < arr.length; i++) {
+  if (arr[i] === 2) break;
+  console.log(arr[i]);
+} // 1
+
+// forEach()方法也会跳过数组的空位
+var log = function (n) {
+  console.log(n + 1);
+};
+[1, undefined, 2].forEach(log);
+// 2
+// NaN
+// 3
+
+[1, null, 2].forEach(log);
+// 2
+// 1
+// 3
+
+[1, , 2].forEach(log);
+// 2
+// 3
+// 上面代码中，forEach()方法不会跳过undefined和null，但会跳过空位
+
+// filter()方法用于过滤数组成员，满足条件的成员组成一个新数组返回
+// 它的参数是一个函数，所有数组成员依次执行该函数，
+// 返回结果为true的成员组成一个新数组返回。该方法不会改变原数组
+console.log(
+  [1, 2, 3, 4, 5].filter(function (elem) {
+    return elem > 3;
+  })
+);
+// [4, 5]
+// filter()方法的参数函数可以接受三个参数：当前成员，当前位置和整个数组
+console.log(
+  [1, 2, 3, 4, 5].filter(function (elem, index, arr) {
+    return index % 2 === 0;
+  })
+);
+// [1, 3, 5]
+// filter()方法还可以接受第二个参数，用来绑定参数函数内部的this变量。
+var obj = { MAX: 3 };
+var myFilter = function (item) {
+  if (item > this.MAX) return true;
+};
+var arr = [2, 8, 3, 4, 1, 3, 2, 9];
+console.log(arr.filter(myFilter, obj)); // [8, 4, 9]
+
+// some()，every()
+// 这两个方法类似“断言”（assert），返回一个布尔值，表示判断数组成员是否符合某种条件。
+// 它们接受一个函数作为参数，所有数组成员依次执行该函数。
+// 该函数接受三个参数：当前成员、当前位置和整个数组，然后返回一个布尔值
+
+// some方法是只要一个成员的返回值是true，则整个some方法的返回值就是true，否则返回false。
+var arr = [1, 2, 3, 4, 5];
+console.log(
+  arr.some(function (elem, index, arr) {
+    return elem >= 3;
+  })
+); // true
+
+// every方法是所有成员的返回值都是true，整个every方法才返回true，否则返回false。
+var arr = [1, 2, 3, 4, 5];
+console.log(
+  arr.every(function (elem, index, arr) {
+    return elem >= 3;
+  })
+); // false
+
+// 注意，对于空数组，some方法返回false，every方法返回true，回调函数都不会执行。
+function isEven(x) {
+  return x % 2 === 0;
+}
+[].some(isEven); // false
+[].every(isEven); // true
+
+// some和every方法还可以接受第二个参数，用来绑定参数函数内部的this变量
+
+// reduce()，reduceRight()
+// reduce()方法和reduceRight()方法依次处理数组的每个成员，最终累计为一个值。
+// 它们的差别是，reduce()是从左到右处理（从第一个成员到最后一个成员），
+// reduceRight()则是从右到左（从最后一个成员到第一个成员），其他完全一样。
+console.log(
+  [1, 2, 3, 4, 5].reduce(function (a, b) {
+    console.log(a, b);
+    return a + b;
+  })
+);
+// 如果数组有 n 个成员，这个参数函数就会执行 n - 1 次。
+
+/*
+reduce()方法和reduceRight()方法的第一个参数都是一个函数。该函数接受以下四个参数。
+
+累积变量。第一次执行时，默认为数组的第一个成员；以后每次执行时，都是上一轮的返回值。
+当前变量。第一次执行时，默认为数组的第二个成员；以后每次执行时，都是下一个成员。
+当前位置。一个整数，表示第二个参数（当前变量）的位置，默认为1。
+原数组。
+
+这四个参数之中，只有前两个是必须的，后两个则是可选的。
+*/
+// 如果要对累积变量指定初值，可以把它放在reduce()方法和reduceRight()方法的第二个参数。
+console.log(
+  [1, 2, 3, 4, 5].reduce(function (a, b) {
+    return a + b;
+  }, 10)
+);
+// 25
+// 注意，这时b是从数组的第一个成员开始遍历，参数函数会执行5次
+
+function add(prev, cur) {
+  return prev + cur;
+}
+// console.log([].reduce(add));
+// TypeError: Reduce of empty array with no initial value
+console.log([].reduce(add, 1));
+// 建议总是加上第二个参数，这样比较符合直觉，
+// 每个数组成员都会依次执行reduce()方法的参数函数。另外，第二个参数可以防止空数组报错。
+
+function subtract(prev, cur) {
+  return prev - cur;
+}
+console.log([3, 2, 1].reduce(subtract)); // 0
+console.log([3, 2, 1].reduceRight(subtract)); // -4
+
+function findLongest(entries) {
+  return entries.reduce(function (longest, entry) {
+    return entry.length > longest.length ? entry : longest;
+  }, "");
+}
+console.log(findLongest(["aaa", "bb", "c"])); // aaa
+
+// indexOf()，lastIndexOf()
+// indexOf方法返回给定元素在数组中第一次出现的位置，如果没有出现则返回-1。
+var a = ["a", "b", "c"];
+
+console.log(a.indexOf("b")); // 1
+console.log(a.indexOf("y")); // -1
+
+// indexOf方法还可以接受第二个参数，表示搜索的开始位置。
+console.log(["a", "b", "c"].indexOf("a", 1)); // -1
+
+// lastIndexOf方法返回给定元素在数组中最后一次出现的位置，如果没有出现则返回-1
+var a = [2, 5, 9, 2];
+console.log(a.lastIndexOf(2)); //3
+console.log(a.lastIndexOf(7)); //-1
+
+// 注意，这两个方法不能用来搜索NaN的位置，即它们无法确定数组成员是否包含NaN。
+console.log([NaN].indexOf(NaN)); // -1
+console.log([NaN].lastIndexOf(NaN)); // -1
+// 这是因为这两个方法内部，使用严格相等运算符（===）进行比较，而NaN是唯一一个不等于自身的值
+
+var users = [
+  { name: "tom", email: "tom@example.com" },
+  { name: "peter", email: "peter@example.com" },
+];
+console.log(users);
+console.log(
+  users
+    .map(function (user) {
+      return user.email;
+    })
+    .filter(function (email) {
+      return /^t/.test(email);
+    })
+    .forEach(function (email) {
+      console.log(email);
+    })
+);
