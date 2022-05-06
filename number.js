@@ -49,3 +49,63 @@ console.log((10.5).toString()); // '10.5'
 
 // 通过方括号运算符也可以调用toString方法。
 console.log((10)["toString"](2)); // '1010'
+
+// toFixed()方法先将一个数转为指定位数的小数，
+// 然后返回这个小数对应的字符串。
+console.log((10).toFixed(2)); // '10.00'
+console.log((10.005).toFixed(2)); // '10.01'
+
+// toExponential方法用于将一个数转为科学计数法形式。
+console.log((10).toExponential()); // '1e+1'
+console.log((10).toExponential(1)); // '1.0e+1'
+console.log((10).toExponential(2)); // '1.00e+1'
+
+console.log((1234).toExponential()); // '1.234e+3'
+console.log((1234).toExponential(1)); // '1.2e+3'
+console.log((1234).toExponential(2)); // '1.23e+3'
+
+// Number.prototype.toPrecision()方法用于将一个数转为指定位数的有效数字
+console.log((12.34).toPrecision(1)); // '1e+1'
+console.log((12.34).toPrecision(2)); // '12'
+console.log((12.34).toPrecision(3)); // '12.3'
+console.log((12.34).toPrecision(4)); // '12.34'
+console.log((12.34).toPrecision(5)); // '12.340'
+
+// Number.prototype.toLocaleString()方法接受一个地区码作为参数，
+// 返回一个字符串，表示当前数字在该地区的当地书写形式。
+console.log((123).toLocaleString("zh-Hans-CN-u-nu-hanidec")); // '一二三'
+
+// 该方法还可以接受第二个参数配置对象，用来定制指定用途的返回字符串。该对象的style属性指定输出样式，
+// 默认值是decimal，表示输出十进制形式。如果值为percent，表示输出百分数
+console.log((123).toLocaleString("zh-Hans-CN", { style: "percent" })); // '12,300%'
+
+// 如果style属性的值为currency，则可以搭配currency属性，输出指定格式的货币字符串形式
+console.log(
+  (123).toLocaleString("zh-Hans-CN", { style: "currency", currency: "CNY" })
+); // ￥123.00
+console.log(
+  (123).toLocaleString("de-DE", { style: "currency", currency: "EUR" })
+); // 123,00 €
+console.log(
+  (123).toLocaleString("en-US", { style: "currency", currency: "USD" })
+); // $123.00
+
+Number.prototype.add = function (x) {
+  return this + x;
+};
+console.log((8)["add"](2)); // 10
+console.log((8).add(3)); // 11
+Number.prototype.subtract = function (x) {
+  return this - x;
+};
+
+console.log((8).add(3).subtract(1)); // 10
+
+Number.prototype.iterate = function () {
+  var result = [];
+  for (var i = 0; i <= this; i++) {
+    result.push(i);
+  }
+  return result;
+};
+console.log((8).iterate()); // [0, 1, 2, 3, 4, 5, 6, 7, 8]
