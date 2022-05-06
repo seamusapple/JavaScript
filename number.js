@@ -31,3 +31,21 @@ Number.MIN_VALUE > 0;
 
 Number.MAX_SAFE_INTEGER; // 9007199254740991
 Number.MIN_SAFE_INTEGER; // -9007199254740991
+
+// Number对象部署了自己的toString方法，用来将一个数值转为字符串形式
+console.log((10).toString()); // '10'
+
+// toString方法可以接受一个参数，表示输出的进制。
+// 如果省略这个参数，默认将数值先转为十进制，再输出字符串；
+// 否则，就根据参数指定的进制，将一个数字转化成某个进制的字符串。
+console.log((10).toString(2)); // '1010'
+console.log((10).toString(8)); // '112'
+console.log((10).toString(16)); // 'a'
+
+// 除了为10加上括号，还可以在10后面加两个点，JavaScript 会把第一个点理解成小数点（即10.0），
+// 把第二个点理解成调用对象属性，从而得到正确结果。
+console.log((10).toString(2)); // '1010'
+console.log((10.5).toString()); // '10.5'
+
+// 通过方括号运算符也可以调用toString方法。
+console.log((10)["toString"](2)); // '1010'
