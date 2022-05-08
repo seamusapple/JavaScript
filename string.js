@@ -25,3 +25,8 @@ console.log(String.fromCharCode(0xd842, 0xdf87)); // 吉
 
 // 字符串实例的length属性返回字符串的长度
 console.log("abc".length); // 3
+
+// charAt方法返回指定位置的字符，参数是从0开始编号的位置
+var s = new String("abc");
+console.log(s.charAt(1)); // b
+console.log(s.charAt(s.length - 1)); // c
