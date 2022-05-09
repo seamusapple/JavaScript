@@ -30,3 +30,10 @@ console.log("abc".length); // 3
 var s = new String("abc");
 console.log(s.charAt(1)); // b
 console.log(s.charAt(s.length - 1)); // c
+
+console.log("abc".charAt(1)); // b
+console.log("abc"[1]); // b
+
+// 如果参数为负数，或大于等于字符串的长度，charAt返回空字符串。
+console.log("abc".charAt(-1)); // ''
+console.log("abc".charAt(3)); // ''
