@@ -37,3 +37,10 @@ console.log("abc"[1]); // b
 // 如果参数为负数，或大于等于字符串的长度，charAt返回空字符串。
 console.log("abc".charAt(-1)); // ''
 console.log("abc".charAt(3)); // ''
+
+// charCodeAt()方法返回字符串指定位置的 Unicode 码点（十进制表示），
+// 相当于String.fromCharCode()的逆操作
+console.log("abc".charCodeAt(1)); // 98
+
+// 如果参数为负数，或大于等于字符串的长度，charCodeAt返回NaN。
+console.log("abc".charCodeAt(-1)); // NaN
