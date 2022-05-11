@@ -44,3 +44,16 @@ console.log("abc".charCodeAt(1)); // 98
 
 // 如果参数为负数，或大于等于字符串的长度，charCodeAt返回NaN。
 console.log("abc".charCodeAt(-1)); // NaN
+
+// concat方法用于连接两个字符串，返回一个新字符串，不改变原字符串
+var s1 = "abc";
+var s2 = "def";
+console.log(s1.concat(s2)); // abcdef
+console.log("a".concat("b", "c")); // abc
+
+// 如果参数不是字符串，concat方法会将其先转为字符串，然后再连接
+var one = 1;
+var two = 2;
+var three = "3";
+console.log("".concat(one, two, three)); // 123
+console.log(one + two + three); // 33
