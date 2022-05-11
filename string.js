@@ -57,3 +57,43 @@ var two = 2;
 var three = "3";
 console.log("".concat(one, two, three)); // 123
 console.log(one + two + three); // 33
+
+// slice()方法用于从原字符串取出子字符串并返回，不改变原字符串。
+// 它的第一个参数是子字符串的开始位置，第二个参数是子字符串的结束位置（不含该位置）
+console.log("JavaScript".slice(0, 4)); // Java
+// 如果省略第二个参数，则表示子字符串一直到原字符串结束
+console.log("JavaScript".slice(4)); // Script
+// 如果参数是负值，表示从结尾开始倒数计算的位置，即该负值加上字符串长度
+console.log("JavaScript".slice(-6)); // Script
+console.log("JavaScript".slice(0, -6)); // Java
+console.log("JavaScript".slice(-2, -1)); // p
+
+// 如果第一个参数大于第二个参数（正数情况下），slice()方法返回一个空字符串
+console.log("JavaScript".slice(2, 1)); // ''
+
+// substring方法用于从原字符串取出子字符串并返回，不改变原字符串，跟slice方法很相像。
+// 它的第一个参数表示子字符串的开始位置，第二个位置表示结束位置（返回结果不含该位置）
+console.log("JavaScript".substring(0, 4)); // Java
+// 如果省略第二个参数，则表示子字符串一直到原字符串的结束。
+console.log("JavaScript".substring(4)); // Script
+
+// 如果第一个参数大于第二个参数，substring方法会自动更换两个参数的位置
+console.log("JavaScript".substring(10, 4)); // Script
+// 等同于
+console.log("JavaScript".substring(4, 10)); // Script
+
+// 如果参数是负数，substring方法会自动将负数转为0
+console.log("JavaScript".substring(-3)); // JavaScript
+console.log("JavaScript".substring(4, -3)); // Java
+// 参数-3会自动变成0，等同于'JavaScript'.substring(4, 0)。
+// 由于第二个参数小于第一个参数，会自动互换位置，所以返回Java
+
+// substr方法用于从原字符串取出子字符串并返回，不改变原字符串，跟slice和substring方法的作用相同。
+// substr方法的第一个参数是子字符串的开始位置（从0开始计算），第二个参数是子字符串的长度
+console.log("JavaScript".substr(4, 6)); // Script
+// 如果省略第二个参数，则表示子字符串一直到原字符串的结束
+console.log("JavaScript".substr(4)); // Script
+// 如果第一个参数是负数，表示倒数计算的字符位置。如果第二个参数是负数，将被自动转为0，因此会返回空字符串
+console.log("JavaScript".substr(-6)); // Script
+console.log("JavaScript".substr(4, -1)); // ''
+// 参数-1自动转为0，表示子字符串长度为0，所以返回空字符串。
