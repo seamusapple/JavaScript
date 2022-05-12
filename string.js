@@ -97,3 +97,84 @@ console.log("JavaScript".substr(4)); // Script
 console.log("JavaScript".substr(-6)); // Script
 console.log("JavaScript".substr(4, -1)); // ''
 // 参数-1自动转为0，表示子字符串长度为0，所以返回空字符串。
+
+// indexOf方法用于确定一个字符串在另一个字符串中第一次出现的位置，
+// 返回结果是匹配开始的位置。如果返回-1，就表示不匹配。
+console.log("hello world".indexOf("o")); // 4
+console.log("JavaScript".indexOf("script")); // -1
+
+// indexOf方法还可以接受第二个参数，表示从该位置开始向后匹配。
+console.log("hello world".indexOf("o", 6)); // 7
+
+// lastIndexOf方法的用法跟indexOf方法一致，主要的区别是lastIndexOf从尾部开始匹配，i
+// ndexOf则是从头部开始匹配
+console.log("hello world".lastIndexOf("o")); // 7
+
+// 另外，lastIndexOf的第二个参数表示从该位置起向前匹配。
+console.log("hello world".lastIndexOf("o", 6)); // 4
+
+// trim方法用于去除字符串两端的空格，返回一个新字符串，不改变原字符串
+console.log(" hello world ".trim()); // 'hello world'
+
+// 该方法去除的不仅是空格，还包括制表符（\t、\v）、换行符（\n）和回车符（\r）
+console.log("\r\nabc \t".trim()); // abc
+
+// toLowerCase方法用于将一个字符串全部转为小写，toUpperCase则是全部转为大写。
+// 它们都返回一个新字符串，不改变原字符串
+console.log("Hello World".toLowerCase()); // 'hello world'
+console.log("hello world".toUpperCase()); // HELLO WORLD
+
+// match方法用于确定原字符串是否匹配某个子字符串，返回一个数组，
+// 成员为匹配的第一个字符串。如果没有找到匹配，则返回null
+const matches = "cat, bat, sat, fat".match("at");
+console.log(matches); // ["at"]
+console.log("cat, bat, sat, fat".match("xt")); // null
+console.log(matches.input); // "cat, bat, sat, fat"
+console.log(matches.index); // 1
+
+// search方法的用法基本等同于match，但是返回值为匹配的第一个位置。如果没有找到匹配，则返回-1。
+console.log("cat, bat, sat, fat".search("at")); // 1
+console.log("cat, bat, sat, fat".search("ax")); // -1
+
+// replace方法用于替换匹配的子字符串，一般情况下只替换第一个匹配（除非使用带有g修饰符的正则表达式）
+console.log("aaa".replace("a", "b")); // baa
+
+// split方法按照给定规则分割字符串，返回一个由分割出来的子字符串组成的数组
+console.log("a|b|c".split("|")); // ['a', 'b', 'c']
+// 如果分割规则为空字符串，则返回数组的成员是原字符串的每一个字符
+console.log("a|b|c".split("")); // ['a', '|', 'b', '|', 'c']
+// 如果省略参数，则返回数组的唯一成员就是原字符串
+console.log("a|b|c".split()); // ["a|b|c"]
+
+// 如果满足分割规则的两个部分紧邻着（即两个分割符中间没有其他字符），则返回数组之中会有一个空字符串。
+console.log("a||c".split("|")); // ['a', '', 'c']
+
+// 如果满足分割规则的部分处于字符串的开头或结尾（即它的前面或后面没有其他字符），
+// 则返回数组的第一个或最后一个成员是一个空字符串。
+console.log("|b|c".split("|")); // ['', 'b', 'c']
+console.log("a|b|".split("|")); // ['a', 'b', '']
+
+// split方法还可以接受第二个参数，限定返回数组的最大成员数
+console.log("a|b|c".split("|", 0)); // []
+console.log("a|b|c".split("|", 1)); // ['a']
+console.log("a|b|c".split("|", 2)); // ['a', 'b']
+console.log("a|b|c".split("|", 3)); // ['a', 'b', 'c']
+console.log("a|b|c".split("|", 4)); // ['a', 'b', 'c']
+
+// localeCompare方法用于比较两个字符串。它返回一个整数，
+// 如果小于0，表示第一个字符串小于第二个字符串；
+// 如果等于0，表示两者相等；
+// 如果大于0，表示第一个字符串大于第二个字符串。
+console.log("apple".localeCompare("banana")); // -1
+console.log("apple".localeCompare("apple")); // 0
+
+// 该方法的最大特点，就是会考虑自然语言的顺序。举例来说，正常情况下，大写的英文字母小于小写字母。
+console.log("B" > "a"); // false
+// 但是，localeCompare方法会考虑自然语言的排序情况，将B排在a的前面
+console.log("B".localeCompare("a")); // 1
+
+// localeCompare还可以有第二个参数，指定所使用的语言（默认是英语），
+// 然后根据该语言的规则进行比较
+console.log("ä".localeCompare("z", "de")); // -1
+console.log("ä".localeCompare("z", "sv")); // 1
+// de表示德语，sv表示瑞典语。德语中，ä小于z，所以返回-1；瑞典语中，ä大于z，所以返回1
