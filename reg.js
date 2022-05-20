@@ -134,3 +134,105 @@ while (true) {
 // 上面代码中，只要exec()方法不返回null，就会一直循环下去，每次输出匹配的位置和匹配的文本。
 // 正则实例对象的lastIndex属性不仅可读，还可写。
 // 设置了g修饰符的时候，只要手动设置了lastIndex的值，就会从指定位置开始匹配
+
+// 字符串的实例方法之中，有4种与正则表达式有关
+/*
+String.prototype.match()：返回一个数组，成员是所有匹配的子字符串。
+String.prototype.search()：按照给定的正则表达式进行搜索，返回一个整数，表示匹配开始的位置。
+String.prototype.replace()：按照给定的正则表达式进行替换，返回替换后的字符串。
+String.prototype.split()：按照给定规则进行字符串分割，返回一个数组，包含分割后的各个成员
+*/
+var s = "_x_x";
+var r11 = /x/;
+var r22 = /y/;
+console.log(s.match(r11)); // [ 'x', index: 1, input: '_x_x', groups: undefined ]
+console.log(s.match(r22)); // null
+// 字符串的match方法与正则对象的exec方法非常类似：匹配成功返回一个数组，匹配失败返回null
+
+// 如果正则表达式带有g修饰符，则该方法与正则对象的exec方法行为不同，会一次性返回所有匹配成功的结果。
+var s = "abba";
+var r33 = /a/g;
+console.log(s.match(r33)); // [ 'a', 'a' ]
+console.log(r33.exec(s)); // [ 'a', index: 0, input: 'abba', groups: undefined ]
+
+// 设置正则表达式的lastIndex属性，对match方法无效，匹配总是从字符串的第一个字符开始。
+var r44 = /a|b/g;
+r44.lastIndex = 7;
+console.log("xaxb".match(r44)); // [ 'a', 'b' ]
+console.log(r.lastIndex); // 0
+
+// 字符串对象的search方法，返回第一个满足条件的匹配结果在整个字符串中的位置。如果没有任何匹配，则返回-1。
+console.log("_x_x".search(/x/)); // 1
+
+// 字符串对象的replace方法可以替换匹配的值。它接受两个参数，第一个是正则表达式，表示搜索模式，第二个是替换的内容。
+// 正则表达式如果不加g修饰符，就替换第一个匹配成功的值，否则替换所有匹配成功的值
+console.log("aaa".replace("a", "b")); // baa
+console.log("aaa".replace(/a/, "b")); // baa
+console.log("aaa".replace(/a/g, "b")); // bbb
+
+// replace方法的一个应用，就是消除字符串首尾两端的空格。
+var str = "  #id div.class   ";
+console.log(str.replace(/^\s+|\s+$/g, "")); // #id div.class
+
+// replace方法的第二个参数可以使用美元符号$，用来指代所替换的内容
+/*
+$&：匹配的子字符串。
+$`：匹配结果前面的文本。
+$'：匹配结果后面的文本。
+$n：匹配成功的第n组内容，n是从1开始的自然数。
+$$：指代美元符号$。
+*/
+console.log("hello world".replace(/(\w+)\s(\w+)/, "$2 $1")); // world hello
+console.log("abc".replace("b", "[$`-$&-$']")); // a[a-b-c]c
+
+// replace方法的第二个参数还可以是一个函数，将每一个匹配内容替换为函数返回值
+console.log(
+  "3 and 5".replace(/[0-9]+/g, function (match) {
+    return 2 * match;
+  })
+); // 6 and 10
+var a = "The quick brown fox jumped over the lazy dog.";
+var pattern = /quick|Brown|lazy/gi;
+console.log(
+  a.replace(pattern, function replacer(match) {
+    return match.toUpperCase();
+  })
+); // The QUICK BROWN fox jumped over the LAZY dog.
+
+// 作为replace方法第二个参数的替换函数，可以接受多个参数。
+// 其中，第一个参数是捕捉到的内容，第二个参数是捕捉到的组匹配（有多少个组匹配，就有多少个对应的参数）。
+// 此外，最后还可以添加两个参数，倒数第二个参数是捕捉到的内容在整个字符串中的位置（比如从第五个位置开始），
+// 最后一个参数是原字符串
+var prices = {
+  p1: "$1.99",
+  p2: "$9.99",
+  p3: "$5.00",
+};
+
+var template =
+  '<span id="p1"></span>' + '<span id="p2"></span>' + '<span id="p3"></span>';
+console.log(
+  template.replace(
+    /(<span id=")(.*?)(">)(<\/span>)/g,
+    function (match, $1, $2, $3, $4) {
+      return $1 + $2 + $3 + prices[$2] + $4;
+    }
+  )
+);
+// <span id="p1">$1.99</span><span id="p2">$9.99</span><span id="p3">$5.00</span>
+// 上面代码的捕捉模式中，有四个括号，所以会产生四个组匹配，在匹配函数中用$1到$4表示。匹配函数的作用是将价格插入模板中
+
+// 字符串对象的split方法按照正则规则分割字符串，返回一个由分割后的各个部分组成的数组。
+// 该方法接受两个参数，第一个参数是正则表达式，表示分隔规则，第二个参数是返回数组的最大成员数。
+// 非正则分割
+console.log("a, b,c, d".split(",")); // [ 'a', ' b', 'c', ' d' ]
+// 正则分割， 去掉多余的空格
+console.log("a, b,c, d".split(/, */)); // [ 'a', 'b', 'c', 'd' ]
+// 指定返回数组的最大成员
+console.log("a, b,c, d".split(/, */, 2)); // [ 'a', 'b' ]
+
+console.log("aaa*a*".split(/a*/)); // [ '', '*', '*' ]
+console.log("aaa**a*".split(/a*/)); // [ '', '*', '*', '*' ]
+
+// 如果正则表达式带有括号，则括号匹配的部分也会作为数组成员返回
+console.log("aaa*a*".split(/(a*)/)); // [ '', 'aaa', '*', 'a', '*' ]
