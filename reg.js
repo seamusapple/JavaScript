@@ -411,3 +411,125 @@ console.log("abb".match(/ab*/)); // [ 'abb', index: 0, input: 'aaa', groups: und
 console.log("abb".match(/ab*?/)); // [ 'a', index: 0, input: 'aaa', groups: undefined ]
 console.log("abb".match(/ab?/)); // [ 'ab', index: 0, input: 'abb', groups: undefined ]
 console.log("abb".match(/ab??/)); // [ 'a', index: 0, input: 'abb', groups: undefined ]
+
+// 修饰符
+// 修饰符（modifier）表示模式的附加规则，放在正则模式的最尾部
+// 修饰符可以单个使用，也可以多个一起使用
+var regex = /test/i;
+var regex = /test/gi;
+
+// g修饰符
+// 默认情况下，第一次匹配成功后，正则对象就停止向下匹配了。
+// g修饰符表示全局匹配（global），加上它以后，正则对象将匹配全部符合条件的结果，主要用于搜索和替换
+var regex = /b/;
+var str = "abba";
+console.log(regex.test(str)); // true
+console.log(regex.test(str)); // true
+console.log(regex.test(str)); // true
+
+// 上面代码中，正则模式不含g修饰符，每次都是从字符串头部开始匹配。所以，连续做了三次匹配，都返回true
+var regex = /b/g;
+var str = "abba";
+console.log(regex.test(str)); // true
+console.log(regex.test(str)); // true
+console.log(regex.test(str)); // false
+// 上面代码中，正则模式含有g修饰符，每次都是从上一次匹配成功处，开始向后匹配。
+// 因为字符串abba只有两个b，所以前两次匹配结果为true，第三次匹配结果为false
+
+// i修饰符
+// 默认情况下，正则对象区分字母的大小写，加上i修饰符以后表示忽略大小写（ignoreCase）
+console.log(/abc/.test("ABC")); // false
+console.log(/abc/i.test("ABC")); // true
+// 上面代码表示，加了i修饰符以后，不考虑大小写，所以模式abc匹配字符串ABC。
+
+// m修饰符
+// m修饰符表示多行模式（multiline），会修改^和$的行为。
+// 默认情况下（即不加m修饰符时），^和$匹配字符串的开始处和结尾处，加上m修饰符以后，^和$还会匹配行首和行尾，即^和$会识别换行符（\n）。
+console.log(/world$/.test("hello world\n")); // false
+console.log(/world$/m.test("hello world\n")); // true
+// 上面的代码中，字符串结尾处有一个换行符。如果不加m修饰符，匹配不成功，因为字符串的结尾不是world；加上以后，$可以匹配行尾
+console.log(/^b/m.test("a\nb")); // true
+// 上面代码要求匹配行首的b，如果不加m修饰符，就相当于b只能处在字符串的开始处。
+// 加上m修饰符以后，换行符\n也会被认为是一行的开始。
+
+// 组匹配
+// 正则表达式的括号表示分组匹配，括号中的模式可以用来匹配分组的内容
+console.log(/fred+/.test("fredd")); // true
+console.log(/(fred)+/.test("fredfred")); // true
+// 上面代码中，第一个模式没有括号，结果+只表示重复字母d，第二个模式有括号，结果+就表示匹配fred这个词
+
+var m = "abcabc".match(/(.)b(.)/);
+console.log(m); // [ 'abc', 'a', 'c', index: 0, input: 'abcabc', groups: undefined ]
+// 上面代码中，正则表达式/(.)b(.)/一共使用两个括号，第一个括号捕获a，第二个括号捕获c
+
+// 注意，使用组匹配时，不宜同时使用g修饰符，否则match方法不会捕获分组的内容
+var m1 = "abcabc".match(/(.)b(.)/g);
+console.log(m1); // [ 'abc', 'abc' ]
+// 上面代码使用带g修饰符的正则表达式，结果match方法只捕获了匹配整个表达式的部分。
+// 这时必须使用正则表达式的exec方法，配合循环，才能读到每一轮匹配的组捕获。
+
+var str = "abcabc";
+var reg = /(.)b(.)/g;
+while (true) {
+  var result = reg.exec(str);
+  if (!result) break;
+  console.log(result);
+}
+// [ 'abc', 'a', 'c', index: 0, input: 'abcabc', groups: undefined ]
+// [ 'abc', 'a', 'c', index: 3, input: 'abcabc', groups: undefined ]
+
+// 正则表达式内部，还可以用\n引用括号匹配的内容，n是从1开始的自然数，表示对应顺序的括号。
+console.log(/(.)b(.)\1b\2/.test("abcabc")); // true
+// 上面的代码中，\1表示第一个括号匹配的内容（即a），\2表示第二个括号匹配的内容（即c）。
+
+console.log(/y(..)(.)\2\1/.test("yabccab")); // true
+// 括号还可以嵌套
+console.log(/y((..)\2)\1/.test("yabababab")); // true
+// 上面代码中，\1指向外层括号，\2指向内层括号。
+
+// 组匹配非常有用，下面是一个匹配网页标签的例子
+var tagName = /<([^>]+)>[^<]*<\/\1>/;
+console.log(tagName.exec("<b>bold</b>")[1]); // b
+// 上面代码中，圆括号匹配尖括号之中的标签，而\1就表示对应的闭合标签
+
+var html = '<b class="hello">Hello</b><i>world</i>';
+var tag = /<(\w+)([^>]*)>(.*?)<\/\1>/g;
+var match = tag.exec(html);
+
+console.log(match[1]); // b
+console.log(match[2]); // class="hello"
+console.log(match[3]); // Hello
+
+match = tag.exec(html);
+console.log(match[1]); // i
+console.log(match[2]); // ""
+console.log(match[3]); // world
+
+// 非捕获组
+// (?:x)称为非捕获组（Non-capturing group），表示不返回该组匹配的内容，即匹配的结果中不计入这个括号。
+/**
+ * 非捕获组的作用请考虑这样一个场景，假定需要匹配foo或者foofoo，正则表达式就应该写成/(foo){1, 2}/，
+ * 但是这样会占用一个组匹配。这时，就可以使用非捕获组，将正则表达式改为/(?:foo){1, 2}/，
+ * 它的作用与前一个正则是一样的，但是不会单独输出括号内部的内容。
+ */
+var m = "abc".match(/(?:.)b(.)/);
+console.log(m); // [ 'abc', 'c', index: 0, input: 'abc', groups: undefined ]
+
+// 先行断言
+// x(?=y)称为先行断言（Positive look-ahead），x只有在y前面才匹配，y不会被计入返回结果。
+// 比如，要匹配后面跟着百分号的数字，可以写成/\d+(?=%)/。
+// “先行断言”中，括号里的部分是不会返回的
+var m = "abc".match(/b(?=c)/);
+console.log(m); // [ 'b', index: 1, input: 'abc', groups: undefined ]
+// 上面的代码使用了先行断言，b在c前面所以被匹配，但是括号对应的c不会被返回
+
+// 先行否定断言
+// x(?!y)称为先行否定断言（Negative look-ahead），x只有不在y前面才匹配，y不会被计入返回结果。
+// 比如，要匹配后面跟的不是百分号的数字，就要写成/\d+(?!%)/。
+console.log(/\d+(?!\.)/.exec("3.14")); // [ '14', index: 2, input: '3.14', groups: undefined ]
+// 上面代码中，正则表达式指定，只有不在小数点前面的数字才会被匹配，因此返回的结果就是14。
+
+// “先行否定断言”中，括号里的部分是不会返回的。
+var m = "abd".match(/b(?!c)/);
+console.log(m); // [ 'b', index: 1, input: 'abd', groups: undefined ]
+// 上面的代码使用了先行否定断言，b不在c前面所以被匹配，而且括号对应的d不会被返回。
