@@ -268,3 +268,128 @@ document.replaceChild(doc.documentElement, document.documentElement);
 // 上面代码中，第一步生成一个新的 HTML 文档doc，
 // 然后用它的根元素doc.documentElement替换掉document.documentElement。
 // 这会使得当前文档的内容全部消失，变成hello world
+
+// 3. 方法
+// 3.1 document.open()，document.close()
+// document.open方法清除当前文档所有内容，使得文档处于可写状态，供document.write方法写入内容。
+// document.close方法用来关闭document.open()打开的文档
+
+// 3.2 document.write()，document.writeln()
+// document.write方法用于向当前文档写入内容
+// 在网页的首次渲染阶段，只要页面没有关闭写入（即没有执行document.close()），
+// document.write写入的内容就会追加在已有内容的后面
+// 页面显示“helloworld”
+document.open();
+document.write("hello");
+document.write("world");
+document.close();
+
+// 注意，document.write会当作 HTML 代码解析，不会转义
+document.write("<p>hello world</p>");
+// 上面代码中，document.write会将<p>当作 HTML 标签解释。
+
+// 如果页面已经解析完成（DOMContentLoaded事件发生之后），再调用write方法，它会先调用open方法，擦除当前文档所有内容，然后再写入。
+document.addEventListener("DOMContentLoaded", function (event) {
+  document.write("<p>Hello World!</p>");
+});
+// 等同于
+document.addEventListener("DOMContentLoaded", function (event) {
+  document.open();
+  document.write("<p>Hello World!</p>");
+  document.close();
+});
+// 如果在页面渲染过程中调用write方法，并不会自动调用open方法。（可以理解成，open方法已调用，但close方法还未调用。）
+<html>
+  <body>
+    hello
+    <script type="text/javascript">document.write("world")</script>
+  </body>
+</html>;
+
+// document.write是 JavaScript 语言标准化之前就存在的方法，
+// 现在完全有更符合标准的方法向文档写入内容（比如对innerHTML属性赋值）。
+// 所以，除了某些特殊情况，应该尽量避免使用document.write这个方法。
+
+// document.writeln方法与write方法完全一致，除了会在输出内容的尾部添加换行符。
+document.write(1);
+document.write(2);
+// 12
+
+document.writeln(1);
+document.writeln(2);
+// 1
+// 2
+//
+// 注意，writeln方法添加的是 ASCII 码的换行符，渲染成 HTML 网页时不起作用，即在网页上显示不出换行。
+// 网页上的换行，必须显式写入<br>。
+
+// 3.3 document.querySelector()，document.querySelectorAll()
+// document.querySelector方法接受一个 CSS 选择器作为参数，返回匹配该选择器的元素节点。
+// 如果有多个节点满足匹配条件，则返回第一个匹配的节点。如果没有发现匹配的节点，则返回null
+var el1 = document.querySelector(".myclass");
+var el2 = document.querySelector("#myParent > [ng-click]");
+
+// document.querySelectorAll方法与querySelector用法类似，区别是返回一个NodeList对象，包含所有匹配给定选择器的节点。
+elementList = document.querySelectorAll(".myclass");
+
+// 这两个方法的参数，可以是逗号分隔的多个 CSS 选择器，返回匹配其中一个选择器的元素节点，这与 CSS 选择器的规则是一致的。
+var matches = document.querySelectorAll("div.note, div.alert");
+// 上面代码返回class属性是note或alert的div元素。
+
+// 这两个方法都支持复杂的 CSS 选择器。
+// 选中 data-foo-bar 属性等于 someval 的元素
+document.querySelectorAll('[data-foo-bar="someval"]');
+
+// 选中 myForm 表单中所有不通过验证的元素
+document.querySelectorAll("#myForm :invalid");
+
+// 选中div元素，那些 class 含 ignore 的除外
+document.querySelectorAll("DIV:not(.ignore)");
+
+// 同时选中 div，a，script 三类元素
+document.querySelectorAll("DIV, A, SCRIPT");
+
+// 但是，它们不支持 CSS 伪元素的选择器（比如:first-line和:first-letter）和伪类的选择器（比如:link和:visited），
+// 即无法选中伪元素和伪类。
+
+// 如果querySelectorAll方法的参数是字符串*，则会返回文档中的所有元素节点。
+// 另外，querySelectorAll的返回结果不是动态集合，不会实时反映元素节点的变化。
+
+// 最后，这两个方法除了定义在document对象上，还定义在元素节点上，即在元素节点上也可以调用。
+
+// 3.4 document.getElementsByTagName()
+// document.getElementsByTagName()方法搜索 HTML 标签名，返回符合条件的元素。
+// 它的返回值是一个类似数组对象（HTMLCollection实例），可以实时反映 HTML 文档的变化。如果没有任何匹配的元素，就返回一个空集。
+var paras = document.getElementsByTagName("p");
+paras instanceof HTMLCollection; // true
+// 上面代码返回当前文档的所有p元素节点
+
+// HTML 标签名是大小写不敏感的，因此getElementsByTagName()方法的参数也是大小写不敏感的。
+// 另外，返回结果中，各个成员的顺序就是它们在文档中出现的顺序。
+
+// 如果传入*，就可以返回文档中所有 HTML 元素。
+var allElement = document.getElementsByTagName("*");
+
+// 注意，元素节点本身也定义了getElementsByTagName方法，返回该元素的后代元素中符合条件的元素。
+// 也就是说，这个方法不仅可以在document对象上调用，也可以在任何元素节点上调用
+
+var firstPara = document.getElementsByTagName("p")[0];
+var spans = firstPara.getElementsByTagName("span");
+// 上面代码选中第一个p元素内部的所有span元素。
+
+// 3.5 document.getElementsByClassName()
+// document.getElementsByClassName()方法返回一个类似数组的对象（HTMLCollection实例），
+// 包括了所有class名字符合指定条件的元素，元素的变化实时反映在返回结果中。
+var elements = document.getElementsByClassName(names);
+
+// 由于class是保留字，所以 JavaScript 一律使用className表示 CSS 的class。
+// 参数可以是多个class，它们之间使用空格分隔
+var elements = document.getElementsByClassName("foo bar");
+// 上面代码返回同时具有foo和bar两个class的元素，foo和bar的顺序不重要。
+
+// 注意，正常模式下，CSS 的class是大小写敏感的。（quirks mode下，大小写不敏感。）
+
+// 与getElementsByTagName()方法一样，getElementsByClassName()方法不仅可以在document对象上调用，也可以在任何元素节点上调用。
+
+// 非document对象上调用
+var elements = rootElement.getElementsByClassName(names);
