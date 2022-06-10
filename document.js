@@ -393,3 +393,294 @@ var elements = document.getElementsByClassName("foo bar");
 
 // 非document对象上调用
 var elements = rootElement.getElementsByClassName(names);
+
+// 3.6 document.getElementsByName()
+// document.getElementsByName()方法用于选择拥有name属性的 HTML 元素（比如<form>、<radio>、<img>、<frame>、<embed>和<object>等），
+// 返回一个类似数组的的对象（NodeList实例），因为name属性相同的元素可能不止一个。
+// 表单为 <form name="x"></form>
+var forms = document.getElementsByName("x");
+forms[0].tagName; // FORM
+
+// 3.7 document.getElementById()
+// document.getElementById()方法返回匹配指定id属性的元素节点。如果没有发现匹配的节点，则返回null
+// 注意，该方法的参数是大小写敏感的。比如，如果某个节点的id属性是main，那么document.getElementById('Main')将返回null
+
+// document.getElementById()方法与document.querySelector()方法都能获取元素节点，
+// 不同之处是document.querySelector()方法的参数使用 CSS 选择器语法，document.getElementById()方法的参数是元素的id属性。
+document.getElementById("myElement");
+document.querySelector("#myElement");
+// 上面代码中，两个方法都能选中id为myElement的元素，
+// 但是document.getElementById()比document.querySelector()效率高得多
+
+// 另外，这个方法只能在document对象上使用，不能在其他元素节点上使用
+
+//3.8 document.elementFromPoint()，document.elementsFromPoint()
+// document.elementFromPoint()方法返回位于页面指定位置最上层的元素节点。
+var element = document.elementFromPoint(50, 50);
+// 上面代码选中在(50, 50)这个坐标位置的最上层的那个 HTML 元素。
+
+// elementFromPoint方法的两个参数，依次是相对于当前视口左上角的横坐标和纵坐标，单位是像素。
+// 如果位于该位置的 HTML 元素不可返回（比如文本框的滚动条），则返回它的父元素（比如文本框）。
+// 如果坐标值无意义（比如负值或超过视口大小），则返回null
+
+// document.elementsFromPoint()返回一个数组，成员是位于指定坐标（相对于视口）的所有元素。
+var elements = document.elementsFromPoint(x, y);
+
+// 3.9 document.createElement()
+// document.createElement方法用来生成元素节点，并返回该节点
+var newDiv = document.createElement("div");
+// createElement方法的参数为元素的标签名，即元素节点的tagName属性，
+// 对于 HTML 网页大小写不敏感，即参数为div或DIV返回的是同一种节点。如果参数里面包含尖括号（即<和>）会报错
+
+// 注意，document.createElement的参数可以是自定义的标签名
+document.createElement("foo");
+
+// 3.10 document.createTextNode()
+// document.createTextNode方法用来生成文本节点（Text实例），并返回该节点。它的参数是文本节点的内容
+var newDiv = document.createElement("div");
+var newContent = document.createTextNode("Hello");
+newDiv.appendChild(newContent);
+// 上面代码新建一个div节点和一个文本节点，然后将文本节点插入div节点
+
+// 这个方法可以确保返回的节点，被浏览器当作文本渲染，而不是当作 HTML 代码渲染。因此，可以用来展示用户的输入，避免 XSS 攻击。
+
+var div = document.createElement("div");
+div.appendChild(document.createTextNode("<span>Foo & bar</span>"));
+console.log(div.innerHTML); // &lt;span&gt;Foo &amp; bar&lt;/span&gt;
+// 上面代码中，createTextNode方法对大于号和小于号进行转义，从而保证即使用户输入的内容包含恶意代码，也能正确显示
+
+// 需要注意的是，该方法不对单引号和双引号转义，所以不能用来对 HTML 属性赋值。
+function escapeHtml(str) {
+  var div = document.createElement("div");
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+}
+
+var userWebsite = '" onmouseover="alert(\'derp\')" "';
+var profileLink = '<a href="' + escapeHtml(userWebsite) + '">Bob</a>';
+var div = document.getElementById("target");
+div.innerHTML = profileLink;
+// <a href="" onmouseover="alert('derp')" "">Bob</a>
+// 上面代码中，由于createTextNode方法不转义双引号，导致onmouseover方法被注入了代码
+
+// 3.11 document.createAttribute()
+// document.createAttribute方法生成一个新的属性节点（Attr实例），并返回它
+var attribute = document.createAttribute(name);
+// document.createAttribute方法的参数name，是属性的名称
+
+var node = document.getElementById("div1");
+var a = document.createAttribute("my_attrib");
+a.value = "newVal";
+
+node.setAttributeNode(a);
+// 或者
+node.setAttribute("my_attrib", "newVal");
+// 上面代码为div1节点，插入一个值为newVal的my_attrib属性。
+
+// 3.12 document.createComment()
+// document.createComment方法生成一个新的注释节点，并返回该节点
+var CommentNode = document.createComment(data);
+// document.createComment方法的参数是一个字符串，会成为注释节点的内容
+
+// 3.13 document.createDocumentFragment()
+// document.createDocumentFragment方法生成一个空的文档片段对象（DocumentFragment实例）
+var docFragment = document.createDocumentFragment();
+// DocumentFragment是一个存在于内存的 DOM 片段，不属于当前文档，常常用来生成一段较复杂的 DOM 结构，然后再插入当前文档
+// 这样做的好处在于，因为DocumentFragment不属于当前文档，对它的任何改动，都不会引发网页的重新渲染，
+// 比直接修改当前文档的 DOM 有更好的性能表现。
+var docfrag = document.createDocumentFragment();
+[1, 2, 3, 4].forEach(function (e) {
+  var li = document.createElement("li");
+  li.textContent = e;
+  docfrag.appendChild(li);
+});
+var element = docfrag.getElementById("ul");
+element.appendChild(docfrag);
+// 上面代码中，文档片断docfrag包含四个<li>节点，这些子节点被一次性插入了当前文档
+
+// 3.14 document.createEvent()
+// document.createEvent方法生成一个事件对象（Event实例），该对象可以被element.dispatchEvent方法使用，触发指定事件.
+var event = document.createEvent(type);
+// document.createEvent方法的参数是事件类型，比如UIEvents、MouseEvents、MutationEvents、HTMLEvents
+var event = document.createEvent("Event");
+event.initEvent("build", true, true);
+document.addEventListener(
+  "build",
+  function (e) {
+    console.log(e.type);
+  },
+  false
+);
+document.dispatchEvent(event);
+// document.createEvent方法的参数是事件类型，比如UIEvents、MouseEvents、MutationEvents、HTMLEvents
+
+// 3.15 document.addEventListener()，document.removeEventListener()，document.dispatchEvent()
+// 这三个方法用于处理document节点的事件。它们都继承自EventTarget接口
+// 添加事件监听函数
+document.addEventListener("click", listener, false);
+
+// 移除事件监听函数
+document.removeEventListener("click", listener, false);
+
+// 触发事件
+var event = new Event("click");
+document.dispatchEvent(event);
+
+// 3.16 document.hasFocus()
+// document.hasFocus方法返回一个布尔值，表示当前文档之中是否有元素被激活或获得焦点
+var focused = document.hasFocus();
+// 注意，有焦点的文档必定被激活（active），反之不成立，激活的文档未必有焦点。
+// 比如，用户点击按钮，从当前窗口跳出一个新窗口，该新窗口就是激活的，但是不拥有焦点
+
+// 3.17 document.adoptNode()，document.importNode()
+// document.adoptNode方法将某个节点及其子节点，从原来所在的文档或DocumentFragment里面移除，
+// 归属当前document对象，返回插入后的新节点。插入的节点对象的ownerDocument属性，
+// 会变成当前的document对象，而parentNode属性是null
+var node = document.adoptNode(externalNode);
+document.appendChild(node);
+// 注意，document.adoptNode方法只是改变了节点的归属，并没有将这个节点插入新的文档树。
+// 所以，还要再用appendChild方法或insertBefore方法，将新节点插入当前文档树
+
+// document.importNode方法则是从原来所在的文档或DocumentFragment里面，
+// 拷贝某个节点及其子节点，让它们归属当前document对象。拷贝的节点对象的ownerDocument属性，
+// 会变成当前的document对象，而parentNode属性是null。
+var node = document.importNode(externalNode, deep);
+// document.importNode方法的第一个参数是外部节点，第二个参数是一个布尔值，表示对外部节点是深拷贝还是浅拷贝，
+// 默认是浅拷贝（false）。虽然第二个参数是可选的，但是建议总是保留这个参数，并设为true。
+
+// 注意，document.importNode方法只是拷贝外部节点，这时该节点的父节点是null。下一步还必须将这个节点插入当前文档树。
+var iframe = document.getElementsByTagName("iframe")[0];
+var oldNode = iframe.contentWindow.document.getElementById("myNode");
+var newNode = document.importNode(oldNode, true);
+document.getElementById("container").appendChild(newNode);
+// 上面代码从iframe窗口，拷贝一个指定节点myNode，插入当前文档
+
+// 3.18 document.createNodeIterator()
+// document.createNodeIterator方法返回一个子节点遍历器
+var nodeIterator = document.createNodeIterator(
+  document.body,
+  NodeFilter.SHOW_ELEMENT
+);
+// 上面代码返回<body>元素子节点的遍历器。
+
+// document.createNodeIterator方法第一个参数为所要遍历的根节点，第二个参数为所要遍历的节点类型，
+// 这里指定为元素节点（NodeFilter.SHOW_ELEMENT）。几种主要的节点类型写法如下
+/*
+所有节点：NodeFilter.SHOW_ALL
+元素节点：NodeFilter.SHOW_ELEMENT
+文本节点：NodeFilter.SHOW_TEXT
+评论节点：NodeFilter.SHOW_COMMENT
+*/
+// document.createNodeIterator方法返回一个“遍历器”对象（NodeFilter实例）。
+// 该实例的nextNode()方法和previousNode()方法，可以用来遍历所有子节点
+var nodeIterator = document.createNodeIterator(document.body);
+var pars = [];
+var currentNode;
+
+while ((currentNode = nodeIterator.nextNode())) {
+  pars.push(currentNode);
+}
+// 上面代码中，使用遍历器的nextNode方法，将根节点的所有子节点，依次读入一个数组。
+// nextNode方法先返回遍历器的内部指针所在的节点，然后会将指针移向下一个节点。
+// 所有成员遍历完成后，返回null。previousNode方法则是先将指针移向上一个节点，然后返回该节点。
+var nodeIterator = document.createNodeIterator(
+  document.body,
+  NodeFilter.SHOW_ELEMENT
+);
+var currentNode = nodeIterator.nextNode();
+var previousNode = nodeIterator.previousNode();
+currentNode === previousNode; // true
+// 上面代码中，currentNode和previousNode都指向同一个的节点
+
+// 注意，遍历器返回的第一个节点，总是根节点
+pars[0] === document.body; // true
+
+// 3.19 document.createTreeWalker()
+// document.createTreeWalker方法返回一个 DOM 的子树遍历器。它与document.createNodeIterator方法基本是类似的，
+// 区别在于它返回的是TreeWalker实例，后者返回的是NodeIterator实例。另外，它的第一个节点不是根节点。
+
+// document.createTreeWalker方法的第一个参数是所要遍历的根节点，
+// 第二个参数指定所要遍历的节点类型（与document.createNodeIterator方法的第二个参数相同）。
+var treeWalker = document.createTreeWalker(
+  document.body,
+  NodeFilter.SHOW_ELEMENT
+);
+var nodeList = [];
+
+while (treeWalker.nextNode()) {
+  nodeList.push(treeWalker, currentNode);
+}
+// 上面代码遍历<body>节点下属的所有元素节点，将它们插入nodeList数组
+
+// 3.20 document.execCommand()，document.queryCommandSupported()，document.queryCommandEnabled()
+//（1）document.execCommand()
+// 如果document.designMode属性设为on，那么整个文档用户可编辑；如果元素的contenteditable属性设为true，那么该元素可编辑。
+// 这两种情况下，可以使用document.execCommand()方法，改变内容的样式，比如document.execCommand('bold')会使得字体加粗。
+document.execCommand(command, showDefaultUI, input);
+// 该方法接受三个参数
+/*
+- command：字符串，表示所要实施的样式。
+- showDefaultUI：布尔值，表示是否要使用默认的用户界面，建议总是设为false。
+- input：字符串，表示该样式的辅助内容，比如生成超级链接时，这个参数就是所要链接的网址。
+如果第二个参数设为true，那么浏览器会弹出提示框，要求用户在提示框输入该参数。
+但是，不是所有浏览器都支持这样做，为了兼容性，还是需要自己部署获取这个参数的方式
+*/
+var url = window.prompt("请输入网址");
+if (url) {
+  document.execCommand("createlink", false, url);
+}
+// 上面代码中，先提示用户输入所要链接的网址，然后手动生成超级链接。注意，第二个参数是false，表示此时不需要自动弹出提示框
+
+// document.execCommand()的返回值是一个布尔值。如果为false，表示这个方法无法生效。
+
+// 这个方法大部分情况下，只对选中的内容生效。如果有多个内容可编辑区域，那么只对当前焦点所在的元素生效
+
+// document.execCommand()方法可以执行的样式改变有很多种，
+// 下面是其中的一些：bold、insertLineBreak、selectAll、createLink、insertOrderedList、
+// subscript、delete、insertUnorderedList、superscript、formatBlock、insertParagraph、undo、
+// forwardDelete、insertText、unlink、insertImage、italic、unselect、insertHTML、redo。
+// 这些值都可以用作第一个参数，它们的含义不难从字面上看出来
+
+// (2）document.queryCommandSupported()
+// document.queryCommandSupported()方法返回一个布尔值，表示浏览器是否支持document.execCommand()的某个命令
+if (document.queryCommandSupported("SelectAll")) {
+  console.log("浏览器支持选中可编辑区域的所有内容");
+}
+
+//（3）document.queryCommandEnabled()
+// document.queryCommandEnabled()方法返回一个布尔值，表示当前是否可用document.execCommand()的某个命令。
+// 比如，bold（加粗）命令只有存在文本选中时才可用，如果没有选中文本，就不可用
+
+// HTML 代码为
+// <input type="button" value="Copy" onclick="doCopy()">
+function doCopy() {
+  // 浏览器是否支持 copy 命令 （选中内容复制到剪贴板)
+  if (document.queryCommandSupported("copy")) {
+    copyText("你好");
+  } else {
+    console.log("浏览器不支持");
+  }
+}
+
+function copyText(text) {
+  var input = document.createElement("textarea");
+  document.body.appendChild(input);
+  input.value = text;
+  input.focus();
+  input.select();
+
+  // 当前是否有选中文字
+  if (document.queryCommandEnabled("copy")) {
+    var success = document.execCommand("copy");
+    input.remove();
+    console.log("Copy Ok");
+  } else {
+    console.log("queryCommandEnabled is false");
+  }
+}
+// 上面代码中，先判断浏览器是否支持copy命令（允许可编辑区域的选中内容，复制到剪贴板），
+// 如果支持，就新建一个临时文本框，里面写入内容“你好”，并将其选中。然后，判断是否选中成功，
+// 如果成功，就将“你好”复制到剪贴板，再删除那个临时文本框
+
+// 3.21 document.getSelection()
+// 这个方法指向window.getSelection()
