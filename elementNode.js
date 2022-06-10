@@ -364,3 +364,53 @@ if (para.children.length) {
 var el = document.getElementById("div-01");
 el.nextElementSibling;
 // <div id="div-02">Here is div-02</div>
+
+// 3 实例方法
+// 3.1 属性相关方法
+// 元素节点提供六个方法，用来操作属性
+/*
+getAttribute()：读取某个属性的值
+getAttributeNames()：返回当前元素的所有属性名
+setAttribute()：写入属性值
+hasAttribute()：某个属性是否存在
+hasAttributes()：当前元素是否有属性
+removeAttribute()：删除属性
+*/
+
+// 3.2 Element.querySelector()
+// Element.querySelector方法接受 CSS 选择器作为参数，返回父元素的第一个匹配的子元素。如果没有找到匹配的子元素，就返回null
+var content = document.getElementById("content");
+var el = content.querySelector("p");
+// 上面代码返回content节点的第一个p元素
+
+// Element.querySelector方法可以接受任何复杂的 CSS 选择器
+document.body.querySelector("style[type='text/css'], style:not([type])");
+// 注意，这个方法无法选中伪元素
+
+// 它可以接受多个选择器，它们之间使用逗号分隔
+element.querySelector("div, p");
+// 上面代码返回element的第一个div或p子元素
+
+// 需要注意的是，浏览器执行querySelector方法时，是先在全局范围内搜索给定的 CSS 选择器，然后过滤出哪些属于当前元素的子元素。
+// 因此，会有一些违反直觉的结果，下面是一段 HTML 代码
+<div>
+  <blockquote id="outer">
+    <p>hello</p>
+    <div id="inner">
+      <p>world</p>
+    </div>
+  </blockquote>
+</div>;
+// 那么，像下面这样查询的话，实际上返回的是第一个p元素，而不是第二个
+var outer = document.getElementById("outer");
+outer.querySelector("div, p");
+// <p>Hello</p>
+
+// 3.3 Element.querySelectorAll()
+// Element.querySelectorAll方法接受 CSS 选择器作为参数，返回一个NodeList实例，包含所有匹配的子元素。
+var el = document.querySelector("#test");
+var matches = el.querySelectorAll("div.highlighted > p");
+// 该方法的执行机制与querySelector方法相同，也是先在全局范围内查找，再过滤出当前元素的子元素。
+// 因此，选择器实际上针对整个文档的
+
+// 它也可以接受多个 CSS 选择器，它们之间使用逗号分隔。如果选择器里面有伪元素的选择器，则总是返回一个空的NodeList实例
