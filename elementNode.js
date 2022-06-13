@@ -414,3 +414,211 @@ var matches = el.querySelectorAll("div.highlighted > p");
 // 因此，选择器实际上针对整个文档的
 
 // 它也可以接受多个 CSS 选择器，它们之间使用逗号分隔。如果选择器里面有伪元素的选择器，则总是返回一个空的NodeList实例
+
+// 3.4 Element.getElementsByClassName()
+// Element.getElementsByClassName方法返回一个HTMLCollection实例，成员是当前元素节点的所有具有指定 class 的子元素节点。
+// 该方法与document.getElementsByClassName方法的用法类似，只是搜索范围不是整个文档，而是当前元素节点
+element.getElementsByClassName("red test");
+// 注意，该方法的参数大小写敏感。
+
+// 由于HTMLCollection实例是一个活的集合，document对象的任何变化会立刻反应到实例，下面的代码不会生效。
+// HTML 代码如下
+// <div id="example">
+//   <p class="foo"></p>
+//   <p class="foo"></p>
+// </div>
+
+var element = document.getElementById("example");
+var matches = element.getElementsByClassName("foo");
+
+for (var i = 0; i < matches.length; i++) {
+  matches[i].classList.remove("foo");
+  matches.items(i).classList.add("bar");
+}
+// 执行后，HTML 代码如下
+// <div id="example">
+//   <p></p>
+//   <p class="foo bar"></p>
+// </div>
+// 上面代码中，matches集合的第一个成员，一旦被拿掉 class 里面的foo，就会立刻从matches里面消失，导致出现上面的结果
+
+// 3.5 Element.getElementsByTagName()
+// Element.getElementsByTagName()方法返回一个HTMLCollection实例，成员是当前节点的所有匹配指定标签名的子元素节点。
+// 该方法与document.getElementsByClassName()方法的用法类似，只是搜索范围不是整个文档，而是当前元素节点
+var table = document.getElementById("forecast-table");
+var cells = table.getElementsByTagName("td");
+// 注意，该方法的参数是大小写不敏感的，因为 HTML 标签名也是大小写不敏感。
+
+// 3.6 Element.closest()
+// Element.closest方法接受一个 CSS 选择器作为参数，返回匹配该选择器的、最接近当前节点的一个祖先节点（包括当前节点本身）。
+// 如果没有任何节点匹配 CSS 选择器，则返回null
+
+// HTML 代码如下
+// <article>
+//   <div id="div-01">Here is div-01
+//     <div id="div-02">Here is div-02
+//       <div id="div-03">Here is div-03</div>
+//     </div>
+//   </div>
+// </article>
+var div03 = document.getElementById("div-03");
+// div-03 最近的祖先节点
+div03.closest("#div-02"); // div-02
+div03.closest("div div"); // div-03
+div03.closest("article > div"); // div-01
+div03.closest(":not(div)"); // article
+// 上面代码中，由于closest方法将当前节点也考虑在内，所以第二个closest方法返回div-03
+
+// 3.7 Element.matches()
+// Element.matches方法返回一个布尔值，表示当前元素是否匹配给定的 CSS 选择器。
+if (el.matches(".someClass")) {
+  console.log("Match!");
+}
+
+// 3.8 事件相关方法
+// 以下三个方法与Element节点的事件相关。这些方法都继承自EventTarget接口，详见相关章节
+/*
+Element.addEventListener()：添加事件的回调函数
+Element.removeEventListener()：移除事件监听函数
+Element.dispatchEvent()：触发事件
+*/
+element.addEventListener("click", listener, false);
+element.removeEventListener("click", listener, false);
+var event = new Event("click");
+element.dispatchEvent(event);
+
+// 3.9 Element.scrollIntoView()
+// Element.scrollIntoView方法滚动当前元素，进入浏览器的可见区域，类似于设置window.location.hash的效果
+el.scrillIntoView(); // 等同于el.scrollIntoView(true)
+el.scrollIntoView(false);
+// 该方法可以接受一个布尔值作为参数。如果为true，表示元素的顶部与当前区域的可见部分的顶部对齐（前提是当前区域可滚动）；
+// 如果为false，表示元素的底部与当前区域的可见部分的尾部对齐（前提是当前区域可滚动）。如果没有提供该参数，默认为true
+
+// 3.10 Element.getBoundingClientRect()
+// Element.getBoundingClientRect方法返回一个对象，提供当前元素节点的大小、位置等信息，基本上就是 CSS 盒状模型的所有信息
+var rect = obj.getBoundingClientRect();
+// 上面代码中，getBoundingClientRect方法返回的rect对象，具有以下属性（全部为只读）。
+/*
+x：元素左上角相对于视口的横坐标
+y：元素左上角相对于视口的纵坐标
+height：元素高度
+width：元素宽度
+left：元素左上角相对于视口的横坐标，与x属性相等
+right：元素右边界相对于视口的横坐标（等于x + width）
+top：元素顶部相对于视口的纵坐标，与y属性相等
+bottom：元素底部相对于视口的纵坐标（等于y + height）
+*/
+// 由于元素相对于视口（viewport）的位置，会随着页面滚动变化，因此表示位置的四个属性值，都不是固定不变的。
+// 如果想得到绝对位置，可以将left属性加上window.scrollX，top属性加上window.scrollY
+
+// 注意，getBoundingClientRect方法的所有属性，都把边框（border属性）算作元素的一部分。也就是说，都是从边框外缘的各个点来计算。
+// 因此，width和height包括了元素本身 + padding + border
+
+// 另外，上面的这些属性，都是继承自原型的属性，Object.keys会返回一个空数组，这一点也需要注意。
+var rect = document.body.gerBoundingClientRect();
+Object.keys(rect); // []
+// 上面代码中，rect对象没有自身属性，而Object.keys方法只返回对象自身的属性，所以返回了一个空数组
+
+// 3.11 Element.getClientRects()
+// Element.getClientRects方法返回一个类似数组的对象，里面是当前元素在页面上形成的所有矩形（所以方法名中的Rect用的是复数）。
+// 每个矩形都有bottom、height、left、right、top和width六个属性，表示它们相对于视口的四个坐标，以及本身的高度和宽度。
+
+// 对于盒状元素（比如<div>和<p>），该方法返回的对象中只有该元素一个成员。对于行内元素（比如<span>、<a>、<em>），
+// 该方法返回的对象有多少个成员，取决于该元素在页面上占据多少行。这是它和Element.getBoundingClientRect()方法的主要区别，
+// 后者对于行内元素总是返回一个矩形
+
+<span id="inline">Hello World Hello World Hello World</span>;
+// 上面代码是一个行内元素<span>，如果它在页面上占据三行，getClientRects方法返回的对象就有三个成员，
+// 如果它在页面上占据一行，getClientRects方法返回的对象就只有一个成员
+var e1 = document.getElementById("inline");
+e1.getClientRects().length; // 3
+e1.getClientRects()[0].left = 3;
+e1.getClientRects()[0].right = 8;
+e1.getClientRects()[0].bottom = 113;
+e1.getClientRects()[0].height = 31;
+e1.getClientRects()[0].width = 105;
+
+// 这个方法主要用于判断行内元素是否换行，以及行内元素的每一行的位置偏移
+
+// 注意，如果行内元素包括换行符，那么该方法会把换行符考虑在内
+<span id="inline">Hello World \n Hello World \n Hello World \n</span>;
+// 上面代码中，<span>节点内部有三个换行符，即使 HTML 语言忽略换行符，将它们显示为一行，getClientRects()方法依然会返回三个成员。
+// 如果行宽设置得特别窄，上面的<span>元素显示为6行，那么就会返回六个成员
+
+// 3.12 Element.insertAdjacentElement()
+// Element.insertAdjacentElement方法在相对于当前元素的指定位置，插入一个新的节点。
+// 该方法返回被插入的节点，如果插入失败，返回null
+element.insertAdjacentElement(position, element);
+
+// Element.insertAdjacentElement方法一共可以接受两个参数，第一个参数是一个字符串，表示插入的位置，第二个参数是将要插入的节点。
+// 第一个参数只可以取如下的值。
+/*
+beforebegin：当前元素之前
+afterbegin：当前元素内部的第一个子节点前面
+beforeend：当前元素内部的最后一个子节点后面
+afterend：当前元素之后
+*/
+
+// 注意，beforebegin和afterend这两个值，只在当前节点有父节点时才会生效。
+// 如果当前节点是由脚本创建的，没有父节点，那么插入会失败。
+var p1 = document.createElement("p");
+var p2 = document.createElement("p");
+p1.insertAdjacentElement("afterend", p2); // null
+// 上面代码中，p1没有父节点，所以插入p2到它后面就失败了
+
+// 如果插入的节点是一个文档里现有的节点，它会从原有位置删除，放置到新的位置
+
+// 3.13 Element.insertAdjacentHTML()，Element.insertAdjacentText()
+// Element.insertAdjacentHTML方法用于将一个 HTML 字符串，解析生成 DOM 结构，插入相对于当前节点的指定位置。
+element.insertAdjacentHTML(position, text);
+
+// 该方法接受两个参数，第一个是一个表示指定位置的字符串，第二个是待解析的 HTML 字符串。第一个参数只能设置下面四个值之一.
+/*
+beforebegin：当前元素之前
+afterbegin：当前元素内部的第一个子节点前面
+beforeend：当前元素内部的最后一个子节点后面
+afterend：当前元素之后
+*/
+
+// HTML 代码：<div id="one">one</div>
+var d1 = document.getElementById("one");
+d1.insertAdjacentHTML("afterend", '<div id="two>two</div>');
+// 执行后的 HTML 代码：
+// <div id="one">one</div><div id="two">two</div>
+
+// 该方法只是在现有的 DOM 结构里面插入节点，这使得它的执行速度比innerHTML方法快得多
+
+// 注意，该方法不会转义 HTML 字符串，这导致它不能用来插入用户输入的内容，否则会有安全风险
+
+// Element.insertAdjacentText方法在相对于当前节点的指定位置，插入一个文本节点，
+// 用法与Element.insertAdjacentHTML方法完全一致
+
+// HTML 代码：<div id="one">one</div>
+var d1 = document.getElementById("one");
+d1.insertAdjacentText(afterend, "two");
+// 执行后的 HTML 代码：
+// <div id="one">one</div>two
+
+// 3.14 Element.remove()
+// Element.remove方法继承自 ChildNode 接口，用于将当前元素节点从它的父节点移除
+var e1 = document.getElementById("mydiv");
+e1.remove();
+// 上面代码将el节点从 DOM 树里面移除。
+
+// 3.16 Element.focus()，Element.blur()
+// Element.focus方法用于将当前页面的焦点，转移到指定元素上
+document.getElementById("my-span").focus();
+
+// 该方法可以接受一个对象作为参数。参数对象的preventScroll属性是一个布尔值，
+// 指定是否将当前元素停留在原始位置，而不是滚动到可见区域。
+function getFocus() {
+  document.getElementById("btn").focus({ preventScroll: false });
+}
+// 上面代码会让btn元素获得焦点，并滚动到可见区域
+
+// 最后，从document.activeElement属性可以得到当前获得焦点的元素
+
+// Element.blur方法用于将焦点从当前元素移除。
+
+// 3.16 Element.click()
+// Element.click方法用于在当前元素上模拟一次鼠标点击，相当于触发了click事件
