@@ -357,3 +357,343 @@ function upload(blobOrFile) {
 }
 
 upload(new Blob(["hello world"], { type: "text/plain" }));
+
+// 3. XMLHttpRequest 的实例方法
+// 3.1 XMLHttpRequest.open()
+// XMLHttpRequest.open()方法用于指定 HTTP 请求的参数，或者说初始化 XMLHttpRequest 实例对象。它一共可以接受五个参数。
+/* void open(string method, string url, optional boolean async, optional string url, optional string password); */
+/*
+- method：表示 HTTP 动词方法，比如GET、POST、PUT、DELETE、HEAD等。
+- url: 表示请求发送目标 URL。
+- async: 布尔值，表示请求是否为异步，默认为true。如果设为false，则send()方法只有等到收到服务器返回了结果，才会进行下一步操作。
+  该参数可选。由于同步 AJAX 请求会造成浏览器失去响应，许多浏览器已经禁止在主线程使用，只允许 Worker 里面使用。
+  所以，这个参数轻易不应该设为false。
+- user：表示用于认证的用户名，默认为空字符串。该参数可选。
+- password：表示用于认证的密码，默认为空字符串。该参数可选。
+*/
+
+// 注意，如果对使用过open()方法的 AJAX 请求，再次使用这个方法，等同于调用abort()，即终止请求。
+var xhr = new XMLHttpRequest();
+xhr.open("POST", encodeURI("someURL"));
+
+// 3.2 XMLHttpRequest.send()
+// XMLHttpRequest.send()方法用于实际发出 HTTP 请求。它的参数是可选的，如果不带参数，就表示 HTTP 请求只有一个 URL，
+// 没有数据体，典型例子就是 GET 请求；如果带有参数，就表示除了头信息，还带有包含具体数据的信息体，典型例子就是 POST 请求。
+
+var xhr = new XMLHttpRequest();
+xhr.open("GET", "http://www.example.com/?id=" + encodeURIComponent(id), true);
+xhr.send(null);
+// 上面代码中，GET请求的参数，作为查询字符串附加在 URL 后面。
+
+var xhr = new XMLHttpRequest();
+var data =
+  "email=" +
+  encodeURIComponent(email) +
+  "&password=" +
+  encodeURIComponent(password);
+xhr.open("POST", "http://www.example.com", true);
+xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+xhr.send(data);
+// 注意，所有 XMLHttpRequest 的监听事件，都必须在send()方法调用之前设定。
+
+// send方法的参数就是发送的数据。多种格式的数据，都可以作为它的参数。
+/*
+void send();
+void send(ArrayBufferView data);
+void send(Blob data);
+void send(Document data);
+void send(String data);
+void send(FormData data);
+*/
+
+// 如果send()发送 DOM 对象，在发送之前，数据会先被串行化。如果发送二进制数据，
+// 最好是发送ArrayBufferView或Blob对象，这使得通过 Ajax 上传文件成为可能。
+
+var formData = new FormData();
+
+formData.append("username", "张三");
+formData.append("email", "zhangsan@gmail.com");
+formData.append("birthDate", 1940);
+
+var xhr = new XMLHttpRequest();
+xhr.open("POST", "/register", true);
+xhr.send(formData);
+// 上面代码中，FormData对象构造了表单数据，然后使用send()方法发送。它的效果与发送下面的表单数据是一样的。
+
+<form id="registration" name="registration" action="/register">
+  <input type="text" name="username" value="张三"></input>
+  <input type="email" name="email" value="zhangsan@example.com"></input>
+  <input type="number" name="birthDate" value="1940"></input>
+  <input type="submit" onclick="return sendForm(this.form);"></input>
+</form>;
+
+function sendForm(form) {
+  var formData = new FormData(form);
+  formData.append("csrf", "e69a18d7db1286040586e6da1950128c");
+
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", form.action, true);
+  xhr.onload = function () {
+    // ...
+  };
+  xhr.send(formData);
+
+  return false;
+}
+
+var form = document.querySelector("#registration");
+sendForm(form);
+
+// 3.3 XMLHttpRequest.setRequestHeader()
+// XMLHttpRequest.setRequestHeader()方法用于设置浏览器发送的 HTTP 请求的头信息。该方法必须在open()之后、send()之前调用。
+// 如果该方法多次调用，设定同一个字段，则每一次调用的值会被合并成一个单一的值发送。
+
+// 该方法接受两个参数。第一个参数是字符串，表示头信息的字段名，第二个参数是字段值。
+
+xhr.setRequestHeader("Content-Type", "application/json");
+xhr.setRequestHeader("Content-Length", JSON.stringify(data).length);
+xhr.send(JSON.stringify(data));
+// 上面代码首先设置头信息Content-Type，表示发送 JSON 格式的数据；然后设置Content-Length，表示数据长度；最后发送 JSON 数据。
+
+// 3.4 XMLHttpRequest.overrideMimeType()
+// XMLHttpRequest.overrideMimeType()方法用来指定 MIME 类型，覆盖服务器返回的真正的 MIME 类型，从而让浏览器进行不一样的处理。
+// 举例来说，服务器返回的数据类型是text/xml，由于种种原因浏览器解析不成功报错，这时就拿不到数据了。
+// 为了拿到原始数据，我们可以把 MIME 类型改成text/plain，这样浏览器就不会去自动解析，从而我们就可以拿到原始文本了。
+
+xhr.overrideMimeType("text/plain");
+
+// 注意，该方法必须在send()方法之前调用。
+
+// 修改服务器返回的数据类型，不是正常情况下应该采取的方法。如果希望服务器返回指定的数据类型，可以用responseType属性告诉服务器，
+// 就像下面的例子。只有在服务器无法返回某种数据类型时，才使用overrideMimeType()方法。
+
+var xhr = new XMLHttpRequest();
+xhr.onload = function () {
+  var arraybuffer = xhr.response;
+  // ...
+};
+xhr.open("GET", url);
+xhr.responseType = "arraybuffer";
+xhr.send();
+
+// 3.5 XMLHttpRequest.getResponseHeader()
+// XMLHttpRequest.getResponseHeader()方法返回 HTTP 头信息指定字段的值，如果还没有收到服务器回应或者指定字段不存在，返回null
+// 该方法的参数不区分大小写。
+
+function getHeaderTime() {
+  console.log(this.getResponseHeader("Last-Modified"));
+}
+
+var xhr = new XMLHttpRequest();
+xhr.open("HEAD", "yourpage.html");
+xhr.onload = getHeaderTime;
+xhr.send();
+
+// 如果有多个字段同名，它们的值会被连接为一个字符串，每个字段之间使用“逗号+空格”分隔。
+
+// 3.6 XMLHttpRequest.getAllResponseHeaders()
+// XMLHttpRequest.getAllResponseHeaders()方法返回一个字符串，表示服务器发来的所有 HTTP 头信息。格式为字符串，
+// 每个头信息之间使用CRLF分隔（回车+换行），如果没有收到服务器回应，该属性为null。如果发生网络错误，该属性为空字符串。
+
+var xhr = new XMLHttpRequest();
+xhr.open("GET", "foo.txt", true);
+xhr.send();
+
+xhr.onreadystatechange = function () {
+  if (this.readyState === 4) {
+    var headers = xhr.getAllResponseHeaders();
+  }
+};
+// 上面代码用于获取服务器返回的所有头信息。它可能是下面这样的字符串。
+/*
+date: Fri, 08 Dec 2017 21:04:30 GMT\r\n
+content-encoding: gzip\r\n
+x-content-type-options: nosniff\r\n
+server: meinheld/0.6.1\r\n
+x-frame-options: DENY\r\n
+content-type: text/html; charset=utf-8\r\n
+connection: keep-alive\r\n
+strict-transport-security: max-age=63072000\r\n
+vary: Cookie, Accept-Encoding\r\n
+content-length: 6502\r\n
+x-xss-protection: 1; mode=block\r\n
+*/
+
+// 然后，对这个字符串进行处理。
+xhr.onreadystatechange = function () {
+  if (this.readyState === 4) {
+    var headers = xhr.getAllResponseHeaders();
+    var arr = headers.split(/[\r\n]+/);
+    var headerMap = {};
+
+    arr.forEach(function (line) {
+      var parts = line.split(": ");
+      var header = parts.shift();
+      var value = parts.join(": ");
+      headerMap[header] = value;
+    });
+  }
+};
+
+headerMap["content-length"]; // "6502"
+
+// 3.7 XMLHttpRequest.abort()
+// XMLHttpRequest.abort()方法用来终止已经发出的 HTTP 请求。调用这个方法以后，readyState属性变为4，status属性变为0。
+
+var xhr = new XMLHttpRequest();
+xhr.open("GET", "your-url", true);
+setTimeout(function () {
+  if (xhr) {
+    xhr.abort();
+    xhr = null;
+  }
+}, 5000);
+// 上面代码在发出5秒之后，终止一个 AJAX 请求。
+
+// 4. XMLHttpRequest 实例的事件
+// 4.1 readyStateChange 事件
+// readyState属性的值发生改变，就会触发 readyStateChange 事件。
+
+// 我们可以通过onReadyStateChange属性，指定这个事件的监听函数，对不同状态进行不同处理。
+// 尤其是当状态变为4的时候，表示通信成功，这时回调函数就可以处理服务器传送回来的数据。
+
+// 4.2 progress 事件
+// 上传文件时，XMLHttpRequest 实例对象本身和实例的upload属性，都有一个progress事件，会不断返回上传的进度。
+
+var xhr = new XMLHttpRequest();
+
+function updateProgress(oEvent) {
+  if (oEvent.lengthComputable) {
+    var percentComplete = oEvent.loaded / oEvent.total;
+  } else {
+    console.log("无法计算进度");
+  }
+}
+
+xhr.addEventListener("progress", updateProgress);
+
+xhr.open();
+
+// 4.3 load 事件、error 事件、abort 事件
+// load 事件表示服务器传来的数据接收完毕，error 事件表示请求出错，abort 事件表示请求被中断（比如用户取消请求）。
+
+var xhr = new XMLHttpRequest();
+
+xhr.addEventListener("load", transferComplete);
+xhr.addEventListener("error", transferFailed);
+xhr.addEventListener("abort", transferCanceled);
+
+xhr.open();
+
+function transferComplete() {
+  console.log("Transfer complete");
+}
+
+function transferFailed() {
+  console.log("Transfer failed");
+}
+
+function transferCanceled() {
+  console.log("Transfer canceled");
+}
+
+// 4.4 loadend 事件
+// abort、load和error这三个事件，会伴随一个loadend事件，表示请求结束，但不知道其是否成功。
+xhr.addEventListener("loadend", loadEnd);
+
+xhr.open();
+
+function loadEnd(e) {
+  console.log("Load End, unkowned status");
+}
+
+// 4.5 timeout 事件
+// 服务器超过指定时间还没有返回结果，就会触发 timeout 事件，具体的例子参见timeout属性一节
+
+// 5. Navigator.sendBeacon()
+// 用户卸载网页的时候，有时需要向服务器发一些数据。很自然的做法是在unload事件或beforeunload事件的监听函数里面，
+// 使用XMLHttpRequest对象发送数据。但是，这样做不是很可靠，因为XMLHttpRequest对象是异步发送，很可能在它即将发送的时候，
+// 页面已经卸载了，从而导致发送取消或者发送失败。
+
+// 解决方法就是unload事件里面，加一些很耗时的同步操作。这样就能留出足够的时间，保证异步 AJAX 能够发送成功。
+
+function log() {
+  var xhr = new XMLHttpRequest();
+  xhr.open("post", "/log", true);
+
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xhr.send("foo=bar");
+}
+
+window.addEventListener("unload", function (event) {
+  log();
+
+  // a time-consuming operation
+  for (let i = 0; i < 10000; i++) {
+    for (let j = 0; j < 10000; j++) {
+      continue;
+    }
+  }
+});
+// 上面代码中，强制执行了一次双重循环，拖长了unload事件的执行时间，导致异步 AJAX 能够发送成功。
+
+// 类似的还可以使用setTimeout()。下面是追踪用户点击的例子。
+
+// HTML 代码如下
+// <a id="target" href="https://baidu.com">click</a>
+const clickTime = 350;
+const theLink = document.getElementById("target");
+
+function log() {
+  let xhr = new XMLHttpRequest();
+  xhr.open("post", "/log", true);
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xhr.send("foo=bar");
+}
+
+theLink.addEventListener("click", function (event) {
+  event.preventDefault();
+  log();
+
+  setTimeout(function () {
+    window.location.href = theLink.getAttribute("href");
+  }, clickTime);
+});
+// 上面代码使用setTimeout()，拖延了350毫秒，才让页面跳转，因此使得异步 AJAX 有时间发出。
+
+// 这些做法的共同问题是，卸载的时间被硬生生拖长了，后面页面的加载被推迟了，用户体验不好。
+
+// 为了解决这个问题，浏览器引入了Navigator.sendBeacon()方法。这个方法还是异步发出请求，但是请求与当前页面线程脱钩，
+// 作为浏览器进程的任务，因此可以保证会把数据发出去，不拖延卸载流程。
+
+window.addEventListener("unload", logData, false);
+
+function logData() {
+  navigator.sendBeacon("/log", JSON.stringify({ some: "data" }));
+}
+
+// Navigator.sendBeacon()方法接受两个参数，第一个参数是目标服务器的 URL，第二个参数是所要发送的数据（可选），
+// 可以是任意类型（字符串、表单对象、二进制对象等等）。
+
+/* navigator.sendBeacon(url, data) */
+
+// 这个方法的返回值是一个布尔值，成功发送数据为true，否则为false。
+
+// 该方法发送数据的 HTTP 方法是 POST，可以跨域，类似于表单提交数据。它不能指定回调函数。
+
+// HTML 代码如下
+// <body onload="analytics('start')" onunload="analytics('end')">
+function analytics(state) {
+  if (!navigator.sendBeacon) return;
+
+  var url = "http://www.example.com/analytics";
+  var data = "state=" + state + "&location=" + window.location;
+  navigator.sendBeacon(url, data);
+}
+
+// 该方法不允许自定义 HTTP 标头，为了以“application/json”的形式发送数据，可以使用 Blob 对象。
+const blob = new Blob([JSON.stringify({ some: "data" })], {
+  type: "application/json; charset=UTF-8",
+});
+navigator.sendBeacon("/log", blob);
+// 这个方法的优先级较低，不会占用页面资源。一般是在浏览器空闲的时候，才会发送
